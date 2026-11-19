@@ -1,0 +1,861 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>DoS Attacks exercises</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="2bd3c2ec-6456-80ec-87a6-cafb3f46f9ba" class="page sans"><header><h1 class="page-title" dir="auto">DoS Attacks exercises</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/arrow-circle-down_gray.svg" style="width:14px;height:14px;display:block"/></span>Level of expertise</th><td><span class="selected-value select-value-color-gray">Cyber Attacks</span></td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Project Description</th><td><mark class="highlight-blue" data-notion-highlight="blue"><strong>Done</strong></mark></td></tr></tbody></table></header><div class="page-body"><p id="2bd3c2ec-6456-8044-8c46-d39315a25e83" class="" dir="auto">In the following exercises I will explore/simulate DoS attacks using the tools hping and GoldenEye.  </p><p id="2bd3c2ec-6456-805a-a836-ecb8f6ee2d4e" class="" dir="auto"><strong><span style="border-bottom:0.05em solid">Setup: </span></strong></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha512-sijCOJblSCXYYmXdwvqV0tak8QJW5iy2yLB1wAbbLc3OOIueqymizRFWUS/mwKctnzPKpNdPJV3aK1zlDMJmXQ==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="2bd3c2ec-6456-804c-9ca8-d808748f3b4e" class="code code-wrap" data-notion-code-syntax="sql"><code class="language-sql" style="white-space:pre-wrap;word-break:break-all">   [ Kali Linux Host PC ] 
+  Attacker OS
+     |
+     | (Host-Only Adapter)
+     |
+[ Metasploitable2 VM ]
+       Victim
+       192.168.56.Y </code></pre><p id="2bd3c2ec-6456-80d0-a831-fcaa3ab088e2" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80d9-8f7f-e1f895368a21" class="" dir="auto">T<mark class="highlight-default" data-notion-highlight="default">he lab environment uses the Kali Linux Host machine as both the attacker and the hypervisor (e.g., VirtualBox or VMware) to run the target. The Metasploitable2 VM is configured on a Host-Only Network. This setup creates a private, isolated network segment, ensuring the target is inaccessible from external networks. The Kali Host machine and the Metasploitable2 VM are on the same subnet (e.g., $192.168.56.0/24), and </mark><mark class="highlight-default" data-notion-highlight="default"><code>ifconfig</code></mark><mark class="highlight-default" data-notion-highlight="default"> command was executed  to confirm the ip addresses and the matching subnet. Connectivity was confirmed using the </mark><mark class="highlight-default" data-notion-highlight="default"><code>ping</code></mark><mark class="highlight-default" data-notion-highlight="default"> utility.</mark></p><p id="2bd3c2ec-6456-8070-aeb0-d0103e434b11" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8063-b44f-f43b67f456a2" class="image" data-notion-image="config2.png" dir="ltr"><a href="config2.png"><img style="width:709.984375px" src="config2.png"/></a></figure><p id="2bd3c2ec-6456-8005-80c2-fcf9d270c704" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80dd-946c-c64764641ddf" class="image" data-notion-image="ping_fromkali.png" dir="ltr"><a href="ping_fromkali.png"><img style="width:709.96875px" src="ping_fromkali.png"/></a></figure><p id="2bd3c2ec-6456-80a0-8cb7-d2873d0e9239" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-808d-956c-d5684b1b7d34" class="image" data-notion-image="ping_result.png" dir="ltr"><a href="ping_result.png"><img style="width:709.953125px" src="ping_result.png"/></a></figure><h3 id="2bd3c2ec-6456-8078-bc3b-d4939fadc374" class="" dir="auto">Beginner Exercises:</h3><p id="2bd3c2ec-6456-80e8-b11d-fb3c06177472" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80af-9866-e0a2116a8030" class="" dir="auto"><strong>Exercise 1 – Using hping3 to send ICMP packets:</strong></p><p id="2bd3c2ec-6456-804b-b999-e3a644bf039e" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Use hping3 to send ICMP packets to the IP address of your test server. Observe the responses received and how the server handles this type of traffic.</mark></p><p id="2bd3c2ec-6456-8000-893d-f2398540f79c" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Objective</mark></p><p id="2bd3c2ec-6456-80ce-9d16-e7683e83f4ae" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">To determine if the target server is active and confirm its network configuration regarding the Internet Control Message Protocol (ICMP) using the packet crafter utility, </mark><mark class="highlight-default" data-notion-highlight="default"><code>hping3</code></mark><mark class="highlight-default" data-notion-highlight="default">.</mark></p><p id="2bd3c2ec-6456-8036-929d-f9927e4170f6" class="" dir="auto">Command: </p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="2bd3c2ec-6456-8064-bbf3-c8b0ede0ec4f" class="code code-wrap" data-notion-code-syntax="bash"><code class="language-bash" style="white-space:pre-wrap;word-break:break-all">sudo hping3 -1 &lt;target_ip&gt;</code></pre><figure id="2bd3c2ec-6456-80a3-b663-d0073e477e40" class="image" data-notion-image="icmp1.png" dir="ltr"><a href="icmp1.png"><img style="width:709.984375px" src="icmp1.png"/></a></figure><p id="2bd3c2ec-6456-80c2-a7f2-c70bd4597ad7" class="" dir="auto">ICMP traffic</p><p id="2bd3c2ec-6456-8081-9733-d85ebe1bc7a3" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80f4-93a4-d8ad1b58e5d4" class="" dir="auto">Observation</p><p id="2bd3c2ec-6456-80bc-982e-c3d0e7b525d8" class="" dir="auto">The observation confirms that the Metasploitable 2 server is alive on the network. It demonstrates that the target&#x27;s operating system or network defences are not filtering or blocking basic ICMP traffic, making it easily discoverable via standard network diagnostic tools.</p><p id="2bd3c2ec-6456-80fb-bc25-e49a9669fd7c" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8058-913f-f69c0c957be0" class="" dir="auto"><strong>Exercise 2 – Sending TCP SYN packets with hping3:</strong></p><p id="2bd3c2ec-6456-807e-86e5-c8b1e9339c57" class="" dir="auto">Use hping3 to send TCP SYN packets to port 80 of your test server. Monitor the server’s behavior while it receives these packets.</p><p id="2bd3c2ec-6456-80d7-afaf-f8260690f0f8" class="" dir="auto">Command: </p><div id="2bd3c2ec-6456-8052-ad4f-ccc796184e63" class="column-list" data-notion-column-list="" dir="auto"><div id="2bd3c2ec-6456-80f2-a81d-e8718b1b72bf" style="width:93.75%" class="column" data-notion-column-ratio="0.9375" dir="auto"><pre id="2bd3c2ec-6456-809f-847d-ea530cb1970b" class="code code-wrap" data-notion-code-syntax="bash"><code class="language-bash" style="white-space:pre-wrap;word-break:break-all">sudo hping3 -S --fast -p 80 &lt;target_ip&gt;</code></pre><p id="2bd3c2ec-6456-8094-b032-db366f1f4813" class="" dir="auto">Before attack</p></div><div id="2bd3c2ec-6456-800c-843f-ddbd33fe19c9" style="width:6.25%" class="column" data-notion-column-ratio="0.0625" dir="auto"><p id="2bd3c2ec-6456-806c-b89f-dcce224441a5" class="" dir="auto">
+</p></div></div><figure id="2bd3c2ec-6456-80f2-abb1-ee8a3dde1809" class="image" data-notion-image="before_attack3.png" dir="ltr"><a href="before_attack3.png"><img style="width:709.984375px" src="before_attack3.png"/></a></figure><p id="2bd3c2ec-6456-8027-9629-ddb54ca8b5d5" class="" dir="auto">before attack </p><p id="2bd3c2ec-6456-80fa-a672-efeeb9ca5e8d" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8006-941c-f7729e6af6f6" class="" dir="auto">During attack</p><figure id="2bd3c2ec-6456-800e-9b8b-f91a393c8444" class="image" data-notion-image="during_attack_cpuvm.png" dir="ltr"><a href="during_attack_cpuvm.png"><img style="width:709.984375px" src="during_attack_cpuvm.png"/></a></figure><p id="2bd3c2ec-6456-8039-8d4c-f5d97861fbeb" class="" dir="auto">CPU during attack</p><p id="2bd3c2ec-6456-8097-804d-f50c24ba5d3e" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8000-b907-f49f6a0d37e2" class="image" data-notion-image="during_attack_browser.png" dir="ltr"><a href="during_attack_browser.png"><img style="width:684px" src="during_attack_browser.png"/></a></figure><p id="2bd3c2ec-6456-806d-b27c-e6358a2d1950" class="" dir="auto">browser during attack</p><p id="2bd3c2ec-6456-8042-a2d4-c27c212ecad8" class="" dir="auto"><br/></p><figure id="2bd3c2ec-6456-80a5-a3ce-e982b7004475" class="image" data-notion-image="during_attack_kali.png" dir="ltr"><a href="during_attack_kali.png"><img style="width:709.984375px" src="during_attack_kali.png"/></a></figure><p id="2bd3c2ec-6456-80ce-ac0f-dd7bad76f9be" class="" dir="auto">wireshark traffic during attack<br/></p><p id="2bd3c2ec-6456-80fa-9ee3-df31aa146ca8" class="" dir="auto">Key Observations</p><table id="2bd3c2ec-6456-8070-8872-c9f35fca888b" class="simple-table" dir="ltr"><thead class="simple-table-header"><tr id="2bd3c2ec-6456-801e-82eb-fff7101acf42" dir="ltr"><th id="NGms" class="simple-table-header-color simple-table-header">Phase</th><th id=";NEc" class="simple-table-header-color simple-table-header">System State / Metric</th><th id="&gt;TKp" class="simple-table-header-color simple-table-header">Technical Finding</th></tr></thead><tbody><tr id="2bd3c2ec-6456-80b4-85b3-fb9e0cb46dd3" dir="ltr"><td id="NGms" class=""><strong>Before Attack</strong></td><td id=";NEc" class=""><strong>CPU Load</strong> (Top Output)</td><td id="&gt;TKp" class=""><mark class="highlight-default" data-notion-highlight="default">Near 0% utilization. CPU idle time (</mark><mark class="highlight-default" data-notion-highlight="default"><code>id</code></mark><mark class="highlight-default" data-notion-highlight="default">) was 99.7% and user time (</mark><mark class="highlight-default" data-notion-highlight="default"><code>us</code></mark><mark class="highlight-default" data-notion-highlight="default">) was 0.0%. (Load average 0.00).</mark></td></tr><tr id="2bd3c2ec-6456-802b-a753-d74f7c3801eb" dir="ltr"><td id="NGms" class=""><strong>During Attack</strong></td><td id=";NEc" class=""><strong>Traffic</strong> (Wireshark)</td><td id="&gt;TKp" class="">Target replied to every SYN request with a SYN, ACK, creating numerous half-open connections.</td></tr><tr id="2bd3c2ec-6456-801e-82b3-efb22493bf3c" dir="ltr"><td id="NGms" class=""><strong>During Attack</strong></td><td id=";NEc" class=""><strong>CPU Load</strong> (Top Output)</td><td id="&gt;TKp" class=""><mark class="highlight-default" data-notion-highlight="default">System resources were exhausted: Software Interrupt (</mark><mark class="highlight-default" data-notion-highlight="default"><code>si</code></mark><mark class="highlight-default" data-notion-highlight="default">) time spiked to 75.0% (processing incoming network packets).  CPU idle time dropped to 25.0%. </mark></td></tr><tr id="2bd3c2ec-6456-807d-9d01-e66e92a4df2b" dir="ltr"><td id="NGms" class=""><strong>During Attack</strong></td><td id=";NEc" class=""><strong>Service Status</strong></td><td id="&gt;TKp" class="">Web browser access to Port 80 resulted in a &quot;Connection has timed out&quot; error.</td></tr></tbody></table><p id="2bd3c2ec-6456-8025-905b-e4b329365c4e" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8067-89b8-ec49207dd08b" class="" dir="auto">Conclusion</p><p id="2bd3c2ec-6456-8079-8aa1-e2904e010f8a" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">The vulnerability of the target&#x27;s TCP/IP stack allowed the attacker&#x27;s SYN Flood (using the </mark><mark class="highlight-default" data-notion-highlight="default"><code>--fast</code></mark><mark class="highlight-default" data-notion-highlight="default"> flag) to successfully exhaust the server&#x27;s kernel resources. This was evidenced by the critical spike in Software Interrupt CPU time, which resulted in a complete Denial of Service (DoS) for the HTTP web service.</mark></p><p id="2bd3c2ec-6456-8096-9993-f574cac4f720" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80b2-8c4d-cb09bda583f0" class="" dir="auto"><strong>Exercise 3 – Testing the server with UDP packets using hping3:</strong></p><p id="2bd3c2ec-6456-8082-a524-e2e21e7d5b67" class="" dir="auto">Send UDP packets to a specific port on your test server with hping3. Observe how the server handles UDP traffic and identify possible vulnerabilities. Target was port 8080</p><p id="2bd3c2ec-6456-807f-b707-e6eed12f6176" class="" dir="auto"><span style="border-bottom:0.05em solid">Before the UDP Flood</span></p><ul id="2bd3c2ec-6456-80a7-81e9-eca23988807e" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The server (Metasploitable2) was running a simple UDP + HTTP listener on port 8080.</li></ul><ul id="2bd3c2ec-6456-8061-8690-e0a2585ea06c" class="bulleted-list" dir="auto"><li style="list-style-type:disc">When testing normally, the web page loaded correctly, and the listener displayed occasional HTTP requests</li></ul><p id="2bd3c2ec-6456-8056-b26e-e0a05822d41e" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80d8-b83b-f70dadd645b0" class="image" data-notion-image="before_udp.png" dir="ltr"><a href="before_udp.png"><img style="width:709.96875px" src="before_udp.png"/></a></figure><p id="2bd3c2ec-6456-800a-b416-d859e3883eca" class="" dir="auto">before UDP attack </p><p id="2bd3c2ec-6456-80e4-a873-fce4469b224b" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8032-85b1-c9fd7e0ac0fa" class="" dir="auto"><span style="border-bottom:0.05em solid">During the UDP Flood</span></p><p id="2bd3c2ec-6456-8042-9217-d06b13a0ba47" class="" dir="auto">Command:</p><pre id="2bd3c2ec-6456-80d2-81a5-da618e6b2ed6" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">sudo hping3 --udp -p 8080 -d 500 --flood &lt;target_ip&gt;</code></pre><p id="2bd3c2ec-6456-80ed-ac89-f6fd09a60d50" class="" dir="auto">Effects:</p><ul id="2bd3c2ec-6456-8003-82d3-f14d321d06c1" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Listener receives continuous UDP 500-byte packets.</li></ul><ul id="2bd3c2ec-6456-80ec-b359-e9672b62494b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Web page becomes unreachable → Connection timed out.</li></ul><ul id="2bd3c2ec-6456-80b7-b1c0-f46311999f05" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU spikes: 13.3% us, 8.3% sy, 77.0% si, 1.3% idle.</li></ul><figure id="2bd3c2ec-6456-80fa-8f8f-d22e2d953424" class="image" data-notion-image="during_udp.png" dir="ltr"><a href="during_udp.png"><img style="width:709.96875px" src="during_udp.png"/></a></figure><p id="2bd3c2ec-6456-80e0-bdb1-d67a5b6bc833" class="" dir="auto">during UDP attack </p><p id="2bd3c2ec-6456-808c-b9af-f0916e1e2d44" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-809e-93b4-ca52d5208a78" class="" dir="auto">Conclusion</p><p id="2bd3c2ec-6456-80b4-a775-f8e92c2cc185" class="" dir="auto">The UDP flood overwhelmed the server’s interrupt handling, dropping CPU idle to 1% and making the HTTP service unavailable. This confirms a successful DoS through UDP volume.</p><p id="2bd3c2ec-6456-80c1-93e0-e10dfb820d23" class="" dir="auto">Possible Vulnerabilities </p><ul id="2bd3c2ec-6456-8050-9c18-d86125f386ec" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No firewall rules → all UDP traffic accepted.</li></ul><ul id="2bd3c2ec-6456-80cf-a952-ccb52beedcfd" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No rate limiting → server processes unlimited packets.</li></ul><ul id="2bd3c2ec-6456-8022-b435-edf3880b0d18" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No DoS protection → easy to overwhelm system interrupts (77% si).</li></ul><p id="2bd3c2ec-6456-8031-aea2-ecfd612069f2" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80ad-ba3c-f9e36eb29692" class="" dir="auto"><strong>Exercise 4 – Configuring and using hping3 for bandwidth tests:</strong></p><p id="2bd3c2ec-6456-8069-8a95-c8ada54da10c" class="" dir="auto">Experiment with hping3 to generate heavy traffic towards your test server, evaluating how it handles a large data load.</p><p id="2bd3c2ec-6456-80a8-9c01-c70125e00c15" class="" dir="auto">During this exercise I tested the server with two hping3 traffic modes, flood and faster and compared the system before and during the tests. The target was port 8010</p><p id="2bd3c2ec-6456-8059-b533-ec1d519b7434" class="" dir="auto"><span style="border-bottom:0.05em solid">Before any hping3 traffic</span></p><ul id="2bd3c2ec-6456-8068-80e7-c410071c0d0d" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU idle: ~100% (server not busy)</li></ul><ul id="2bd3c2ec-6456-8098-bb05-c0f5c165000b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No interrupt load</li></ul><ul id="2bd3c2ec-6456-804d-9153-f5d7f2cb7d5f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Web page on port 8010 loads and works normally</li></ul><figure id="2bd3c2ec-6456-807b-9f2c-f6d8ffbc58c8" class="image" data-notion-image="beforeattack.png" dir="ltr"><a href="beforeattack.png"><img style="width:709.984375px" src="beforeattack.png"/></a></figure><p id="2bd3c2ec-6456-807f-a511-fa18b704b813" class="" dir="auto">before attack</p><p id="2bd3c2ec-6456-8024-94f7-fbb7df32dcf1" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-808b-826d-ebc40ef29814" class="" dir="auto"><span style="border-bottom:0.05em solid">During hping3 --faster</span></p><ul id="2bd3c2ec-6456-80d3-8d0b-d35ae0d5bc2a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU idle: 38% → CPU about 65% busy</li></ul><ul id="2bd3c2ec-6456-80bf-8ae6-f6798f122ecc" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Still high interrupt load</li></ul><ul id="2bd3c2ec-6456-8021-8e4b-f3c48750d949" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Server cannot process HTTP requests</li></ul><ul id="2bd3c2ec-6456-80a5-9392-d115cba3bf64" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Web page  times out</li></ul><figure id="2bd3c2ec-6456-8045-b626-f1f60c35e3aa" class="image" data-notion-image="fast_during.png" dir="ltr"><a href="fast_during.png"><img style="width:709.96875px" src="fast_during.png"/></a></figure><p id="2bd3c2ec-6456-80a6-836c-efc2c67cf3c2" class="" dir="auto">during attack —faster flag</p><p id="2bd3c2ec-6456-8042-804d-daccd744698d" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8096-8739-edef8d3ef9cb" class="" dir="auto"><span style="border-bottom:0.05em solid">Command</span></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js" integrity="sha512-m3JYEI6gx5fh9jF10FjGoMzVKcV2N6nchcDcqPCdI1L3R2WQV7br2XVNR8iTLb2daOMRl3zldbcfT40xU2ntVw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="2bd3c2ec-6456-805f-933f-d2735e6221ff" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">sudo hping3 -S -p 8010 --faster &lt;target_ip&gt;</code></pre><p id="2bd3c2ec-6456-8058-b963-e14571070af4" class="" dir="auto">During hping3 --flood</p><ul id="2bd3c2ec-6456-8033-9506-f095ca622946" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU idle: 7.2% → CPU about 92.8% busy</li></ul><ul id="2bd3c2ec-6456-805d-85b4-c09e081f5901" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Very high software interrupt (si) activity</li></ul><ul id="2bd3c2ec-6456-8057-9941-c5036d78b0ce" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Web page does not load → browser shows timeout<br/></li></ul><figure id="2bd3c2ec-6456-80de-a031-ea8a8015a0e3" class="image" data-notion-image="flood_during.png" dir="ltr"><a href="flood_during.png"><img style="width:710px" src="flood_during.png"/></a></figure><p id="2bd3c2ec-6456-801e-834f-c4f48300834e" class="" dir="auto">during attack —flood flag </p><p id="2bd3c2ec-6456-80fc-958e-d0020ba82ef4" class="" dir="auto">Command </p><pre id="2bd3c2ec-6456-80b2-aa77-f957371e3288" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">sudo hping3 -S --flood -p 8010 --rand-source &lt;target_ip&gt;</code></pre><p id="2bd3c2ec-6456-8058-8168-d8e3c738d52e" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Conclusion</mark></p><p id="2bd3c2ec-6456-80a5-90d7-db43137c1ff7" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Under normal conditions the server stays fully idle and responds instantly. When hping3 is used with either the </mark><mark class="highlight-default" data-notion-highlight="default"><code>--flood</code></mark><mark class="highlight-default" data-notion-highlight="default"> or </mark><mark class="highlight-default" data-notion-highlight="default"><code>--faster</code></mark><mark class="highlight-default" data-notion-highlight="default"> flag, the CPU becomes heavily loaded with interrupt handling. This prevents the webserver from replying, resulting in repeated timeouts.</mark></p><p id="2bd3c2ec-6456-8008-8218-e10eba0004e1" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80db-9113-db5f7357f96c" class="" dir="auto"><strong>Exercise 5 – Using goldeneye for simple DoS tests:</strong></p><p id="2bd3c2ec-6456-8043-a36a-d860bc4e5650" class="" dir="auto">Install and use goldeneye to send repetitive HTTP requests to your test server. Observe the effect of these requests on the server’s availability. Target was port 8010</p><p id="2bd3c2ec-6456-80eb-9ebb-c2cd9de75865" class="" dir="auto"><span style="border-bottom:0.05em solid">Command</span></p><pre id="2bd3c2ec-6456-80e9-a35d-ed0b72ca8cc0" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all">python goldeneye.py &lt;target_ip&gt; -w 50 -s 100 -m get </code></pre><p id="2bd3c2ec-6456-80d4-9217-ddf711675926" class="" dir="auto">Before the attack </p><ul id="2bd3c2ec-6456-80e5-ac52-c755f71fa795" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU load: Almost 0% (idle around 99–100%).</li></ul><ul id="2bd3c2ec-6456-8036-96c7-d04fe6da7648" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Connections on port 8010: 2 active connections.</li></ul><ul id="2bd3c2ec-6456-80e2-9969-c842b91b4126" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Web server: Pages load normally and fast.</li></ul><p id="2bd3c2ec-6456-8046-92da-f49989aa55ce" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-802f-b444-f3826d188330" class="image" data-notion-image="golden_before.png" dir="ltr"><a href="golden_before.png"><img style="width:709.96875px" src="golden_before.png"/></a></figure><p id="2bd3c2ec-6456-80a1-a20d-dc7d74161340" class="" dir="auto">before goldeneye attack</p><p id="2bd3c2ec-6456-801d-a9d4-c7d2c39025a4" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8091-8922-f2b858936aa2" class="" dir="auto">During the GoldenEye attack</p><ul id="2bd3c2ec-6456-8010-8b28-d67516d8f938" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU load: Still almost 0% (idle around 100%) → CPU not impacted.</li></ul><ul id="2bd3c2ec-6456-806d-9cea-c675f06ff9f9" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Connections on port 8010: Increased to 29.</li></ul><ul id="2bd3c2ec-6456-80ed-b9ba-f0c3eebd3516" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Browser behaviour: The page refused to load or took very long (effectively unreachable).</li></ul><ul id="2bd3c2ec-6456-8063-90a1-e5d48a0dad7a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Server logs: Show repeated GET requests from multiple workers.</li></ul><figure id="2bd3c2ec-6456-8085-80b2-ca482ed0d188" class="image" data-notion-image="golden_during.png" dir="ltr"><a href="golden_during.png"><img style="width:709.984375px" src="golden_during.png"/></a></figure><p id="2bd3c2ec-6456-801c-b8ed-c78f308db7ec" class="" dir="auto">during goldeneye attack </p><p id="2bd3c2ec-6456-8027-b191-d0f825ed5a9b" class="" dir="auto"><span style="border-bottom:0.05em solid">Conclusion </span></p><p id="2bd3c2ec-6456-80f2-b8f4-d7b4a762807a" class="" dir="auto">Even though CPU usage stayed extremely low, the GoldenEye attack overwhelmed the web server with many concurrent HTTP connections, causing the page to stop loading. This shows the server is vulnerable to application-layer DoS, where exhaustion of connections—not CPU—causes the service disruption.</p><h3 id="2bd3c2ec-6456-80a5-8003-d87655766bdc" class="" dir="auto">Intermediate Exercises:</h3><p id="2bd3c2ec-6456-80cf-b992-f49ba8398010" class="" dir="auto"><strong>Exercise 6 – Configuring goldeneye for more advanced DoS tests:</strong></p><p id="2bd3c2ec-6456-80c6-a011-d9df2094665e" class="" dir="auto">Explore different options and settings of goldeneye to perform more complex DoS tests, such as sending HTTP requests with random content. Targets ; port 80 and port 8010</p><p id="2bd3c2ec-6456-8088-89eb-de9a4b76985b" class="" dir="auto">1) Command: Random payload POST attack on port 80 ND=$(openssl rand -hex 512)</p><pre id="2bd3c2ec-6456-8016-86cc-e4254b467ace" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">
+python3 goldeneye.py http://192.168.56.103/ -w 15 -s 50 -m post -d &quot;$RAND&quot;</code></pre><p id="2bd3c2ec-6456-80ab-a134-dde61e80e64f" class="" dir="auto">Before the attack (port 80)</p><ul id="2bd3c2ec-6456-8075-bdd5-c1c25379b64a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The Metasploitable2 home page loaded instantly in the browser.</li></ul><ul id="2bd3c2ec-6456-8026-bc5b-f3bdd99c4fff" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU was almost idle (around 0% use).</li></ul><p id="2bd3c2ec-6456-8089-8664-d51f515cea95" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8094-a2b5-ffe4162c0441" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-808c-b037-cf4dee1edc7b" class="image" data-notion-image="before_golden.png" dir="ltr"><a href="before_golden.png"><img style="width:709.984375px" src="before_golden.png"/></a></figure><p id="2bd3c2ec-6456-80be-bd2a-c5a10f4045b1" class="" dir="auto">before attack port 80</p><p id="2bd3c2ec-6456-807e-8156-e08837f13641" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-806d-9ad8-d356357ae389" class="" dir="auto">During the attack (port 80)</p><ul id="2bd3c2ec-6456-8065-8cbe-f0efa36c4d24" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The page stopped loading and firefox showed no response</li></ul><ul id="2bd3c2ec-6456-80d4-a578-ea9a406b651c" class="bulleted-list" dir="auto"><li style="list-style-type:disc"> goldeneye displayed connection timeout</li></ul><ul id="2bd3c2ec-6456-8048-823b-cf127caa9e32" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU still stayed low (≈0–1%), but connections were exhausted.</li></ul><p id="2bd3c2ec-6456-8033-b50a-dd02ce2b94cd" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80ad-92ca-cd6ea4ee1516" class="image" data-notion-image="during_golden_cm1.png" dir="ltr"><a href="during_golden_cm1.png"><img style="width:709.96875px" src="during_golden_cm1.png"/></a></figure><p id="2bd3c2ec-6456-807b-96f2-ee612fb8ff9e" class="" dir="auto">during attack port 80 </p><p id="2bd3c2ec-6456-80ba-87c6-db4a4c35f2ae" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8032-9f21-fff845129c40" class="" dir="auto">2) Command: GET attack with rotating useragents on port 8010</p><pre id="2bd3c2ec-6456-80d6-a1a1-cc2a0701c5d7" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">python3 goldeneye.py http://192.168.56.103:8010 -w 10 -s 40 --useragents
+</code></pre><p id="2bd3c2ec-6456-806c-8111-f4b777adba63" class="" dir="auto">Before the attack port 8010 </p><p id="2bd3c2ec-6456-804f-8382-f3aaf55a8f5c" class="" dir="auto"> The Aconcagua page loaded instantly.</p><p id="2bd3c2ec-6456-80f6-a44e-fa464ddea5de" class="" dir="auto">CPU usage was almost 0%.</p><figure id="2bd3c2ec-6456-80f3-9091-e2e4df515f26" class="image" data-notion-image="before_goldencm2.png" dir="ltr"><a href="before_goldencm2.png"><img style="width:709.96875px" src="before_goldencm2.png"/></a></figure><p id="2bd3c2ec-6456-8073-add4-d0b0b6322924" class="" dir="auto">before attack port 8010</p><p id="2bd3c2ec-6456-80e1-bcb0-c5bc1ba63874" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-800e-8b9b-ea891a72db91" class="" dir="auto">During the attack port 8010</p><ul id="2bd3c2ec-6456-8076-9be5-f148b29b582c" class="bulleted-list" dir="auto"><li style="list-style-type:disc">GoldenEye sent many GET requests using different useragents</li></ul><ul id="2bd3c2ec-6456-803d-9cd2-e66a19c1bc00" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Python server console filled with continuous GET entries.</li></ul><ul id="2bd3c2ec-6456-8018-b2ae-eeaf1beb378a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Browser could no longer load the page </li></ul><ul id="2bd3c2ec-6456-8011-b483-f5801bf49d02" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU still stayed very low, but the server became unreachable.</li></ul><figure id="2bd3c2ec-6456-8021-9da3-ded2f1077d60" class="image" data-notion-image="golden_duringcm2.png" dir="ltr"><a href="golden_duringcm2.png"><img style="width:709.984375px" src="golden_duringcm2.png"/></a></figure><p id="2bd3c2ec-6456-800f-8675-d34ea9479b79" class="" dir="auto">during attack port 8010</p><p id="2bd3c2ec-6456-8046-843e-e0fcdd3a37d8" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-806e-ab61-c03208250de2" class="" dir="auto">Conclusion</p><p id="2bd3c2ec-6456-8056-bb6d-cbb20dee2289" class="" dir="auto">Even though CPU usage stayed almost 0% in both tests, the GoldenEye attacks overloaded the web servers by exhausting HTTP connections with many POST requests with random data (port 80) and many GET requests with rotating useragents (port 8010).</p><p id="2bd3c2ec-6456-8027-9795-e21a83c18255" class="" dir="auto">This shows that application-layer DoS attacks can make a server unreachable without high CPU usage, simply by overwhelming its available connections.</p><p id="2bd3c2ec-6456-80b9-b765-f7e0ecf6d123" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80c5-ac6a-caf0aa370b79" class="" dir="auto"><strong>Exercise 7 – Testing the web server with goldeneye during another DoS attack:</strong></p><p id="2bd3c2ec-6456-80ea-814b-f07244a27e56" class="" dir="auto">Run goldeneye to perform a DoS attack, while at the same time using hping3 to send TCP SYN packets to the same server. Observe how the server reacts when facing these two types of simultaneous attacks. Target was port 8010</p><p id="2bd3c2ec-6456-800c-b381-c312670ca83b" class="" dir="auto"><span style="border-bottom:0.05em solid">Before the Attack</span></p><ul id="2bd3c2ec-6456-8005-80c2-eceb42147a41" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The web server on 8010 loads normally.</li></ul><ul id="2bd3c2ec-6456-80ab-ac93-fa4cac96abaf" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU is almost idle (id ≈ 99–100%).</li></ul><ul id="2bd3c2ec-6456-806f-8341-f3d2c72d8631" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Only a few normal TCP connections.</li></ul><ul id="2bd3c2ec-6456-8093-8efe-c6f75e5f6abd" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Browser responds instantly.</li></ul><figure id="2bd3c2ec-6456-8039-ba76-c902bc3ac20d" class="image" data-notion-image="beforeattack%201.png" dir="ltr"><a href="beforeattack%201.png"><img style="width:709.96875px" src="beforeattack%201.png"/></a></figure><p id="2bd3c2ec-6456-806c-ae9f-d10a4ce38487" class="" dir="auto">before attacks port 8010</p><p id="2bd3c2ec-6456-80f9-8539-cf9531a9def7" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-802c-a462-d70e49547732" class="" dir="auto"><span style="border-bottom:0.05em solid">During the Combined Attack (GoldenEye + hping3 SYN flood)</span></p><p id="2bd3c2ec-6456-8036-b427-d864f3794bdf" class="" dir="auto"><span style="border-bottom:0.05em solid">GoldenEye </span></p><ul id="2bd3c2ec-6456-80bc-80dc-e63069f73696" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Command used:<pre id="2bd3c2ec-6456-80a7-9a08-d44013453c28" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">python3 goldeneye.py http://192.168.56.103:8010 -w 10 -s 50 -m random
+</code></pre></li></ul><ul id="2bd3c2ec-6456-802a-85f4-d1e3dd0562f6" class="bulleted-list" dir="auto"><li style="list-style-type:disc">GoldenEye sends many HTTP GET/POST requests.</li></ul><ul id="2bd3c2ec-6456-8016-912f-ec571c6c0e04" class="bulleted-list" dir="auto"><li style="list-style-type:disc">This stresses:<ul id="2bd3c2ec-6456-80eb-ac3d-e0bff1886e38" class="bulleted-list" dir="auto"><li style="list-style-type:circle">The webserver threads</li></ul><ul id="2bd3c2ec-6456-80c4-800d-cd5e8bc63554" class="bulleted-list" dir="auto"><li style="list-style-type:circle">Application-level request handling<p id="2bd3c2ec-6456-8043-962a-e3aa77ad2eab" class="" dir="auto">
+</p></li></ul></li></ul><p id="2bd3c2ec-6456-8091-b9cd-ffe82086b151" class="" dir="auto"><span style="border-bottom:0.05em solid">hping3 SYN Flood </span></p><ul id="2bd3c2ec-6456-8083-800a-ff237c8c1a82" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Command:<pre id="2bd3c2ec-6456-806f-af14-e7ee29896801" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">sudo hping3 -S --flood -p 8010 192.168.56.103</code></pre></li></ul><ul id="2bd3c2ec-6456-8007-9373-d7ace8937df8" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Sends TCP SYN packets without completing the handshake.</li></ul><p id="2bd3c2ec-6456-803e-ab24-dedc1529389b" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-800c-ab7d-c747bdba1721" class="image" data-notion-image="duringattack.png" dir="ltr"><a href="duringattack.png"><img style="width:709.984375px" src="duringattack.png"/></a></figure><p id="2bd3c2ec-6456-8010-8a4b-d75d4e33406e" class="" dir="auto">during attacks port 8010</p><p id="2bd3c2ec-6456-80a6-a8c1-efbffcff58ba" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80fe-84d1-f2daa9e9b918" class="" dir="auto">Observed Effects</p><ul id="2bd3c2ec-6456-8088-b72e-e399d52e68b9" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">CPU shows high si% (software interrupts), around 39% si.</mark></li></ul><ul id="2bd3c2ec-6456-803e-8f19-f0dd4c45de00" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">id% drops low. ( 39.3%)</mark></li></ul><ul id="2bd3c2ec-6456-802d-9653-cde006287983" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">Browser cannot load the page anymore—request hangs.</mark></li></ul><ul id="2bd3c2ec-6456-8089-ac76-e157c4e8cc29" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default"><code>netstat</code></mark><mark class="highlight-default" data-notion-highlight="default"> shows SYN_RECV </mark></li></ul><ul id="2bd3c2ec-6456-807e-89b6-ef904e0892f4" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">Server becomes unresponsive and experiences a full denial of service</mark></li></ul><p id="2bd3c2ec-6456-804d-afb1-d923628ae7d4" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-803a-9095-f39fc2a61cc8" class="" dir="auto"><strong>Exercise 8 – Analyzing the impact of DoS attacks on server performance:</strong></p><p id="2bd3c2ec-6456-809d-b00e-ea03f6d6937a" class="" dir="auto">Monitor the server’s resources (CPU, memory, bandwidth) during a DoS attack generated with hping3 and goldeneye. Note the impact on performance and identify potential weak points.</p><p id="2bd3c2ec-6456-8010-9ce2-fd2d3308e882" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8045-b81d-d488feee4563" class="" dir="auto">During the DoS tests performed with GoldenEye (HTTP flood) and hping3 (SYN flood), the server showed several clear performance impacts directly related to these attack types.</p><p id="2bd3c2ec-6456-80f6-9ef9-da951276ee65" class="" dir="auto">Resource Impact</p><ul id="2bd3c2ec-6456-8016-9402-f801a9814528" class="bulleted-list" dir="auto"><li style="list-style-type:disc">CPU:<ul id="2bd3c2ec-6456-80ba-bcc0-fef08acad3a1" class="bulleted-list" dir="auto"><li style="list-style-type:circle">hping3 increased software interrupts, reducing idle CPU.</li></ul><ul id="2bd3c2ec-6456-80df-8191-de809c0224db" class="bulleted-list" dir="auto"><li style="list-style-type:circle">GoldenEye increased system CPU due to many active HTTP sessions.</li></ul></li></ul><ul id="2bd3c2ec-6456-800c-8bd4-ed33878de68e" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Memory:<ul id="2bd3c2ec-6456-803f-847c-ecd21d47696c" class="bulleted-list" dir="auto"><li style="list-style-type:circle">Apache consumed more RAM as GoldenEye opened and held multiple connections.</li></ul></li></ul><ul id="2bd3c2ec-6456-8037-9618-d5f7575e2f6f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Network Traffic:<ul id="2bd3c2ec-6456-8057-816f-e691d65a9cab" class="bulleted-list" dir="auto"><li style="list-style-type:circle">hping3 generated a large spike in packets per second, increasing interface load.</li></ul></li></ul><p id="2bd3c2ec-6456-800b-ad59-f3a7b7f464c5" class="" dir="auto">Connection Behavior</p><ul id="2bd3c2ec-6456-8024-a405-daa1c39aaacc" class="bulleted-list" dir="auto"><li style="list-style-type:disc">hping3:<p id="2bd3c2ec-6456-8048-9b8a-f0a4199b94e6" class="" dir="auto">Large numbers of connections accumulated in SYN_RECV, showing a classic SYN-flood effect.</p></li></ul><ul id="2bd3c2ec-6456-8023-8d1b-c661e1824abd" class="bulleted-list" dir="auto"><li style="list-style-type:disc">GoldenEye:<p id="2bd3c2ec-6456-801d-819f-ef83c287a0b0" class="" dir="auto">Many connections remained in ESTABLISHED and CLOSE_WAIT, which overloaded Apache’s worker threads.</p></li></ul><p id="2bd3c2ec-6456-8041-a8b3-d0d1b9b507fc" class="" dir="auto">This resulted in slow page loads, delayed responses, and occasional failures to load the web page.</p><p id="2bd3c2ec-6456-80e2-abdc-fcb55873cdc3" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8050-9d55-f8884c142a45" class="" dir="auto">Service Stability</p><ul id="2bd3c2ec-6456-8001-8a73-e143bb853d27" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Under both attacks, the server had difficulty responding to normal requests.</li></ul><ul id="2bd3c2ec-6456-804c-b925-e43940ba8d55" class="bulleted-list" dir="auto"><li style="list-style-type:disc">At higher loads, the webserver became partially unresponsive or timed out.</li></ul><ul id="2bd3c2ec-6456-803e-ace0-ec50f6fa3690" class="bulleted-list" dir="auto"><li style="list-style-type:disc">This shows the server struggles under both packet-level and application-level floods.</li></ul><p id="2bd3c2ec-6456-8075-855f-dc21f8c87d69" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-803a-b464-d971898e72c6" class="" dir="auto">Weak Points Identified</p><ul id="2bd3c2ec-6456-80cc-986e-fd086efb8056" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No SYN-flood protection → backlog fills quickly during hping3.</li></ul><ul id="2bd3c2ec-6456-8084-9826-c8aa4294963d" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Apache not hardened → accepts too many simultaneous HTTP requests.</li></ul><ul id="2bd3c2ec-6456-8050-91dd-e1a182d88082" class="bulleted-list" dir="auto"><li style="list-style-type:disc">No rate limiting or firewall rules → traffic is not filtered or restricted.</li></ul><ul id="2bd3c2ec-6456-800d-a9c7-ddcb733c08d1" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Default configurations make it easy for GoldenEye to exhaust server resources.</li></ul><p id="2bd3c2ec-6456-8069-8dc5-e3805d175016" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8039-a1fa-e7e53ca7963c" class="" dir="auto">Conclusion</p><p id="2bd3c2ec-6456-80d6-898c-c5b98a825575" class="" dir="auto">The attacks demonstrated that the server becomes overloaded when facing sustained SYN floods or heavy HTTP request floods. CPU, memory, and connection tables all show signs of stress, causing slow or failed responses. These results highlight the need for rate-limiting, SYN cookies, and Apache hardening to improve resilience against DoS conditions.</p><p id="2bd3c2ec-6456-80fb-8247-e2db66e25377" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80da-bcbc-f123805c5b37" class="" dir="auto"><strong> Exercise 9 – Using hping3 for fragmented packet tests:</strong></p><p id="2bd3c2ec-6456-80d7-8ef0-e78264eb5800" class="" dir="auto">Experiment with hping3 to send fragmented packets to your test server. Analyse how the server manages and reassembles these packets.</p><p id="2bd3c2ec-6456-8012-9ce6-cc432f743133" class="" dir="auto">The target of the attack was port 8010</p><p id="2bd3c2ec-6456-807b-ad24-cea0df372eb3" class="" dir="auto"><span style="border-bottom:0.05em solid">Before attack</span></p><p id="2bd3c2ec-6456-80de-b980-c99931370ade" class="" dir="auto">CPU almost fully idle, page loads normally.</p><ul id="2bd3c2ec-6456-804f-bc49-c56e03372c3b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">id: 100%</li></ul><ul id="2bd3c2ec-6456-80e2-bc2a-db2fd8882d7f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">si: 0%</li></ul><ul id="2bd3c2ec-6456-80b5-9d3f-e573f90beb1f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">us: 0%</li></ul><p id="2bd3c2ec-6456-80ca-a13f-ef9a52d137fd" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8057-a909-edf5265441a5" class="image" data-notion-image="before_attack.png" dir="ltr"><a href="before_attack.png"><img style="width:678px" src="before_attack.png"/></a></figure><p id="2bd3c2ec-6456-8061-a09e-c27053c0ef0d" class="" dir="auto">before attacks</p><p id="2bd3c2ec-6456-80a2-a30a-e6764f556630" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8052-92e0-c4513fb11177" class="" dir="auto"><span style="border-bottom:0.05em solid">During fragmented attack – faster and flood mode </span></p><p id="2bd3c2ec-6456-80c4-8c1b-dc2a9e7ef1f5" class="" dir="auto">Commands:</p><pre id="2bd3c2ec-6456-80d1-9e30-fff96ef0fb16" class="code code-wrap" data-notion-code-syntax="bash"><code class="language-bash" style="white-space:pre-wrap;word-break:break-all">sudo hping3 -S -p 8010 -f --faster &lt;target_ip&gt;
+sudo hping3 -S -p 8010 -f --flood &lt;target_ip&gt;
+</code></pre><figure id="2bd3c2ec-6456-80cd-9f58-f3a8733a6fcb" class="image" data-notion-image="duringfaster3.png" dir="ltr"><a href="duringfaster3.png"><img style="width:709.984375px" src="duringfaster3.png"/></a></figure><p id="2bd3c2ec-6456-808d-9fa7-db2cde0e0478" class="" dir="auto">during hping -faster flag </p><p id="2bd3c2ec-6456-80e2-b269-ca8d63b7ef34" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8072-a78f-c31445bd9ffb" class="image" data-notion-image="during_flood.png" dir="ltr"><a href="during_flood.png"><img style="width:709.96875px" src="during_flood.png"/></a></figure><p id="2bd3c2ec-6456-8081-b5aa-c2e6247f16c2" class="" dir="auto">during hping -flood flag </p><p id="2bd3c2ec-6456-80a5-b66d-d1fdac43c7a0" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8083-b809-de72902e8671" class="" dir="auto">Fragmented packet attacks severely overload the Metasploitable2 server. </p><p id="2bd3c2ec-6456-8061-911e-e29537c29639" class="" dir="auto">Before the attack, the system is fully idle at 100%. </p><p id="2bd3c2ec-6456-80f2-ae01-cd9ee52ba365" class="" dir="auto">When fragmented packets are sent in faster mode, the CPU idle time drops to 52.5% while software interrupts rise to 47.5%, and the web page immediately times out. </p><p id="2bd3c2ec-6456-8081-8f4a-df14a21267ce" class="" dir="auto">Under the flood option, the situation becomes even worse: idle drops to 27% and software interrupts reach around 70–73%, causing the server to become completely unresponsive.</p><p id="2bd3c2ec-6456-805f-b168-da5df00a7a69" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80f3-90f0-f71be52338c1" class="" dir="auto"><strong>Exercise 10 – Testing protection against DoS attacks:</strong></p><p id="2bd3c2ec-6456-8059-bee7-caaddb702f66" class="" dir="auto">Configure DoS protection solutions on your test server and run tests again with hping3 and goldeneye to evaluate the effectiveness of these solutions in preventing or mitigating the impact of attacks.</p><p id="2bd3c2ec-6456-807f-8b8d-f1319c1124b0" class="" dir="auto">I created a shell script that applies DoS-protection rules using iptables and tested its effectiveness with GoldenEye and hping3.</p><p id="2bd3c2ec-6456-80f7-9d10-c0d4e5c58a34" class="" dir="auto"><span style="border-bottom:0.05em solid">How the Script Works </span></p><p id="2bd3c2ec-6456-8088-9048-fa551a59c6eb" class="" dir="auto">The script resets all old firewall rules and then adds new ones that protect the server from DoS traffic. </p><p id="2bd3c2ec-6456-8046-95ea-dd101f610f50" class="" dir="auto">It allows normal connections, but limits how many new requests an IP can send in a short time. If an IP sends too many packets too fast—like in a flood attack—the firewall drops them. </p><p id="2bd3c2ec-6456-80ef-a696-f7e96b438be1" class="" dir="auto">This keeps the server responsive while blocking abusive traffic.</p><p id="2bd3c2ec-6456-80aa-a2d3-e9a0709227c1" class="" dir="auto"><span style="border-bottom:0.05em solid">Before Enabling Protection</span></p><p id="2bd3c2ec-6456-8048-b745-d1a17b7fa2d8" class="" dir="auto">GoldenEye (big.html)</p><ul id="2bd3c2ec-6456-807e-8a0b-dea1ffa9e48c" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The target page stopped loading and eventually timed out.</li></ul><p id="2bd3c2ec-6456-808f-9700-dbca4794567e" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-806b-9ecf-c3a45785ffda" class="image" data-notion-image="during_goldeneye.png" dir="ltr"><a href="during_goldeneye.png"><img style="width:709.984375px" src="during_goldeneye.png"/></a></figure><p id="2bd3c2ec-6456-80d7-a5b1-c6d3000a7484" class="" dir="auto">goldeneye attack without protection</p><p id="2bd3c2ec-6456-80c7-9f15-cb6c91e382ad" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80f4-b2a0-db68a1139263" class="" dir="auto">hping3 Flood</p><p id="2bd3c2ec-6456-8046-9f3c-c894bd08bab9" class="" dir="auto">Browser displayed timeout errors.</p><p id="2bd3c2ec-6456-80c2-b6c6-e6e2fe1e45a0" class="" dir="auto">The server became unreachable.</p><p id="2bd3c2ec-6456-80b6-bb24-ff13d04b50b1" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80ab-b8e7-f1ed13d1769c" class="image" data-notion-image="page_during_before.png" dir="ltr"><a href="page_during_before.png"><img style="width:709.984375px" src="page_during_before.png"/></a></figure><p id="2bd3c2ec-6456-80de-a205-dde08ea0b281" class="" dir="auto">hping attack without protection<br/></p><p id="2bd3c2ec-6456-8079-a947-e6534e30cb08" class="" dir="auto"><span style="border-bottom:0.05em solid">After Enabling Protection</span></p><p id="2bd3c2ec-6456-80ed-9e18-de142c128bd9" class="" dir="auto">GoldenEye</p><ul id="2bd3c2ec-6456-801f-9d58-c0a9e689ced7" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The browser displayed content normally instead of freezing or timing out.</li></ul><ul id="2bd3c2ec-6456-8011-a3ff-cd40a09413df" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The firewall filtered most of the repeated HTTP requests.</li></ul><p id="2bd3c2ec-6456-80d6-b3be-d3c339f14e67" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80de-9b73-ed4d43fc2ea9" class="image" data-notion-image="goldeneye_with_protection.png" dir="ltr"><a href="goldeneye_with_protection.png"><img style="width:709.96875px" src="goldeneye_with_protection.png"/></a></figure><p id="2bd3c2ec-6456-8015-8033-f349a122f402" class="" dir="auto">goldeneye attack while protection is enabled </p><p id="2bd3c2ec-6456-809d-a6bc-e8576c45ed98" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80ae-9f3f-fabbe3d986fc" class="" dir="auto"><strong>hping3</strong></p><ul id="2bd3c2ec-6456-8097-923f-fcdcd5a60a52" class="bulleted-list" dir="auto"><li style="list-style-type:disc">The homepage still loaded during the SYN flood.</li></ul><p id="2bd3c2ec-6456-8078-9e84-f8520f54bda6" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8071-9a99-e762589a1044" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8049-a0b5-e2c4f2f637fa" class="image" data-notion-image="BROWSER_WITH_PROTECTION_HPING.png" dir="ltr"><a href="BROWSER_WITH_PROTECTION_HPING.png"><img style="width:709.96875px" src="BROWSER_WITH_PROTECTION_HPING.png"/></a></figure><p id="2bd3c2ec-6456-8054-afbd-f895fabb4ce1" class="" dir="auto">hping attack while protection is on </p><p id="2bd3c2ec-6456-80a5-be9c-f2314f95b37f" class="" dir="auto"><span style="border-bottom:0.05em solid">Conclusion</span></p><p id="2bd3c2ec-6456-80f1-81d3-caefffab6ea5" class="" dir="auto">Activating the protection rules made a noticeable difference in how the server reacted to GoldenEye and hping3 traffic.</p><p id="2bd3c2ec-6456-80f8-a3e1-f1cc6c1f6574" class="" dir="auto">Without any filtering, the attacks caused complete service disruption and prevented the pages from loading at all.</p><p id="2bd3c2ec-6456-80f6-8b44-dd69a9fc3878" class="" dir="auto">After applying the iptables rules, the malicious traffic was largely blocked or limited, allowing the website to stay online and respond under the same attack conditions.</p><p id="2bd3c2ec-6456-8019-8409-e3712ba60160" class="" dir="auto">The results clearly show that even a basic firewall setup can significantly reduce the impact of simple DoS attempts and help maintain access to the service during high volumes of unwanted traffic.</p><p id="2bd3c2ec-6456-80e4-b37d-da90b67b97f2" class="" dir="auto">To review or run the firewall configuration, download the attached script file and execute it on the Metasploitable2 machine.</p><figure id="2bd3c2ec-6456-8010-a261-cb06c3f68315" dir="ltr"><div class="source"><a href="DoS_protection.sh" data-notion-file="DoS_protection.sh" data-notion-file-alias="DoS_protection.sh">DoS_protection.sh</a></div></figure><p id="2bd3c2ec-6456-8028-9b03-c1144e7ab850" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80f8-8518-c7f0ec1d4a66" class="" dir="auto">Through these exercises, I gained hands-on experience with both network-level attacks (ICMP, TCP SYN, UDP, fragmented packets) using hping3 and application-level DoS attacks using GoldenEye. I observed how such traffic impacts server performance in terms of CPU, memory, and bandwidth usage, identifying weak points under different load conditions. Additionally, I tested how the server reacts to combined attack vectors, which highlighted the importance of layered security. Finally, by applying  various DoS protection mechanisms, I evaluated their effectiveness in mitigating or reducing the impact of attacks. This lab provided practical insights into DoS attack behavior, detection, and defensive strategies</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

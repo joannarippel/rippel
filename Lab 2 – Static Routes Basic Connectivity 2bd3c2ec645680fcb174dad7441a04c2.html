@@ -1,0 +1,813 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Lab 2 – Static Routes: Basic Connectivity</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="2bd3c2ec-6456-80fc-b174-dad7441a04c2" class="page sans"><header><h1 class="page-title" dir="auto">Lab 2 – Static Routes: Basic Connectivity</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/arrow-circle-down_gray.svg" style="width:14px;height:14px;display:block"/></span>Level of expertise</th><td><span class="selected-value">Networking</span></td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Project Description</th><td><strong>Laboratory 2 – Static Routing (Short Version)</strong><br/><br/>This lab teaches how to connect different networks in Cisco Packet Tracer using <strong>static routes</strong>.<br/><strong>What you will learn:</strong><br/><br/>• What static routing is and how it works.<br/><br/>• How to use <strong>ip route</strong> to tell routers exactly where to send traffic.<br/><br/>• How to test connections with <strong>ping</strong> and <strong>traceroute</strong>.<br/><br/>• How to fix routing problems caused by wrong settings.<br/><br/>• How to link multiple subnets so they can communicate.<br/><strong>After the lab you can:</strong><br/><br/>• Explain when static routing is useful.<br/><br/>• Add and check static routes on Cisco routers.<br/><br/>• Solve simple routing and connectivity issues.<br/><br/>• Build small network topologies where all devices can reach each other.<br/><strong>Who it&#x27;s for:</strong><br/><br/>Beginners and students who want practical experience with basic IP routing in Packet Tracer.<br/><br/></td></tr></tbody></table></header><div class="page-body"><h1 id="2bd3c2ec-6456-8068-b847-e46b34e5e7b1" class="" dir="auto">OBJECTIVE:</h1><p id="2bd3c2ec-6456-80ca-84c7-f6f5d877f9d2" class="" dir="auto">Lab practice on Static Routes and ensuring end-to-end connectivity</p><ol type="1" id="2bd3c2ec-6456-80ba-8d55-e5ad437358f4" class="numbered-list" start="1" dir="auto"><li>Connect the devices (cabling)</li></ol><ol type="1" id="2bd3c2ec-6456-8006-b5ad-d4022ad9f756" class="numbered-list" start="2" dir="auto"><li>Assign IP addresses to Routers, Switches, and PCs</li></ol><ul id="2bd3c2ec-6456-80ad-b6fc-db1999de9858" class="bulleted-list" dir="auto"><li style="list-style-type:disc">GREEN network:<p id="2bd3c2ec-6456-80a1-9410-f2aa9a5e4fbc" class="" dir="auto">RED1-BLUE1: 89.12.0.0/24</p><p id="2bd3c2ec-6456-803f-b944-f360fa5d514f" class="" dir="auto">RED1-YELLOW1: 89.13.0.0/24</p><p id="2bd3c2ec-6456-8005-9b77-dedb4bcf15cc" class="" dir="auto">YELLOW1-BLUE1: 89.32.0.0/24</p></li></ul><ul id="2bd3c2ec-6456-8090-9c95-fb0962deed30" class="bulleted-list" dir="auto"><li style="list-style-type:disc">RED network: 172.16.0.0/24</li></ul><ul id="2bd3c2ec-6456-80c3-b518-dbde90896628" class="bulleted-list" dir="auto"><li style="list-style-type:disc">BLUE network: 192.168.0.0/24</li></ul><ul id="2bd3c2ec-6456-8042-a297-e777e9dd8142" class="bulleted-list" dir="auto"><li style="list-style-type:disc">YELLOW network: 10.8.8.0/24</li></ul><ul id="2bd3c2ec-6456-80ef-bcba-e7f4933f6a8c" class="bulleted-list" dir="auto"><li style="list-style-type:disc">DNS Server IP: 10.8.8.8</li></ul><ul id="2bd3c2ec-6456-80ec-afca-d9756a2ed5b3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">HTTP Server IP: 10.8.8.9</li></ul><ul id="2bd3c2ec-6456-80e3-aef0-ff132f1a2f40" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Router YELLOW1 IP: 10.8.8.1</li></ul><ol type="1" id="2bd3c2ec-6456-806f-9f35-cee2e0df3986" class="numbered-list" start="3" dir="auto"><li>Set Hostnames, Enable passwords, and login banners</li></ol><ol type="1" id="2bd3c2ec-6456-8004-8dbd-e0b4d769fb83" class="numbered-list" start="4" dir="auto"><li>Configure Telnet on the BLUE1 Router</li></ol><ol type="1" id="2bd3c2ec-6456-80c3-9488-ddef34eb824d" class="numbered-list" start="5" dir="auto"><li>Configure SSH on the YELLOW1 and RED1 Routers</li></ol><ol type="1" id="2bd3c2ec-6456-801e-926c-e2aa0dc8efcb" class="numbered-list" start="6" dir="auto"><li>Set Static Routes between the networks</li></ol><ol type="1" id="2bd3c2ec-6456-806f-a2bc-d1cde1ec7edd" class="numbered-list" start="7" dir="auto"><li>Access the following websites from the browser on each PC:<p id="2bd3c2ec-6456-8070-bbbc-dcd5eaa6bf82" class="" dir="auto"><a href="http://www.google.ro/">http://www.google.ro</a></p><p id="2bd3c2ec-6456-80fe-9273-ecd6e07607aa" class="" dir="auto"><a href="https://www.facebook.ro/">https://www.facebook.ro/</a></p></li></ol><h1 id="2bd3c2ec-6456-80b1-8acd-f86a42102b33" class="" dir="auto"><strong>Network Topology Overview</strong></h1><ul id="2bd3c2ec-6456-8090-8f5b-cebef9d47f85" class="bulleted-list" dir="auto"><li style="list-style-type:disc">GREEN network:<p id="2bd3c2ec-6456-809d-9c02-e3e2e8f5de55" class="" dir="auto">RED1-BLUE1: 89.12.0.0/24</p><p id="2bd3c2ec-6456-8083-9a20-f72f3698da9e" class="" dir="auto">RED1-YELLOW1: 89.13.0.0/24</p><p id="2bd3c2ec-6456-80dc-a90a-e438e0c3baef" class="" dir="auto">YELLOW1-BLUE1: 89.32.0.0/24</p></li></ul><ul id="2bd3c2ec-6456-809f-90e3-c614bc7c14e3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">RED network: 172.16.0.0/24</li></ul><ul id="2bd3c2ec-6456-80a0-be8f-d44ceeefc169" class="bulleted-list" dir="auto"><li style="list-style-type:disc">BLUE network: 192.168.0.0/24</li></ul><ul id="2bd3c2ec-6456-8024-bd24-c23637d973a5" class="bulleted-list" dir="auto"><li style="list-style-type:disc">YELLOW network: 10.8.8.0/24</li></ul><ul id="2bd3c2ec-6456-8031-9cf2-cca4a0c2b5ce" class="bulleted-list" dir="auto"><li style="list-style-type:disc">DNS Server IP: 10.8.8.8</li></ul><ul id="2bd3c2ec-6456-80b2-a025-eb90cc5a2fdf" class="bulleted-list" dir="auto"><li style="list-style-type:disc">HTTP Server IP: 10.8.8.9</li></ul><ul id="2bd3c2ec-6456-8081-aee1-dd2218103f60" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Router YELLOW1 IP: 10.8.8.1</li></ul><p id="2bd3c2ec-6456-806b-ba6a-f3dd3b9285be" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80ef-8eeb-dc6f23ed7d5e" class="" dir="auto">The network is divided into four broadcast domains, connected through routers.</p><p id="2bd3c2ec-6456-80c3-8dad-c609ef24d5ae" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8048-b191-cfbb561f9f53" class="image" data-notion-image="topology.jpeg" dir="ltr"><a href="topology.jpeg"><img style="width:793.984375px" src="topology.jpeg"/></a></figure><h1 id="2bd3c2ec-6456-80a5-b272-f3a6f1a92bb2" class="" dir="auto"><strong>Step-by-Step Configuration</strong></h1><p id="2bd3c2ec-6456-801e-8b03-ee2606639609" class="" dir="auto"><strong>Step 1: Cabling</strong></p><p id="2bd3c2ec-6456-8060-8f61-da4a4f4a1988" class="" dir="auto"> I connected all PCs, laptops, switches, and routers by using appropriate cables.</p><p id="2bd3c2ec-6456-801f-8972-c4e3c8b9e03d" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80e4-b302-d215573b02fe" class="image" data-notion-image="topology2.jpg" dir="ltr"><a href="topology2.jpg"><img style="width:793.984375px" src="topology2.jpg"/></a></figure><p id="2bd3c2ec-6456-803e-a674-c00af8835045" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-801d-9329-ddc937828221" class="" dir="auto"><strong>Step 2 : IP address assignment and devices configuration </strong></p><p id="2bd3c2ec-6456-807a-908d-c53347fc4f4a" class="" dir="auto">Configured IP addressing on all devices based on the provided addressing scheme. </p><p id="2bd3c2ec-6456-80aa-b88a-e21ca2bf8028" class="" dir="auto">I assigned hostnames to all routers to facilitate device identification. and  enabled passwords and login banners to provide security notices upon access.</p><p id="2bd3c2ec-6456-80f9-b9bb-d61e300a249a" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8093-b403-c62eb34aa773" class="image" data-notion-image="routerblue.jpeg" dir="ltr"><a href="routerblue.jpeg"><img style="width:548.984375px" src="routerblue.jpeg"/></a></figure><p id="2bd3c2ec-6456-80d1-8a79-c661347f5c9b" class="" dir="auto">Router configuration ex: hostname, password and IP address</p><p id="2bd3c2ec-6456-809c-afd4-d23748878fe4" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-800f-85cc-e6a8f17ee5cf" class="image" data-notion-image="banner.jpeg" dir="ltr"><a href="banner.jpeg"><img style="width:548.984375px" src="banner.jpeg"/></a></figure><p id="2bd3c2ec-6456-8077-bb87-f6aacf0dc104" class="" dir="auto">Router configuration banner </p><p id="2bd3c2ec-6456-806e-9726-d52ba36ed608" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80a3-ad81-e4db83d1a925" class="" dir="auto"><strong>Step 3 :Configuration of TELNET on Blue Router and SSH on Yellow and Red Routers</strong></p><p id="2bd3c2ec-6456-80a6-b207-f08a28b71bdd" class="" dir="auto"><strong>Telnet</strong> and <strong>SSH</strong> are network protocols used to remotely access and manage devices, such as routers, switches, or servers, over a network.<br/><br/></p><figure id="2bd3c2ec-6456-8045-9e86-e08058be5db4" class="image" data-notion-image="telnetblue.jpeg" dir="ltr"><a href="telnetblue.jpeg"><img style="width:548.984375px" src="telnetblue.jpeg"/></a></figure><p id="2bd3c2ec-6456-801e-919d-d86076c365a0" class="" dir="auto">Telnet configuration on Blue Router</p><p id="2bd3c2ec-6456-80f0-afe0-d9d7948552e0" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-805e-94cb-c0e3707ba0c1" class="image" data-notion-image="bluetelnet.jpeg" dir="ltr"><a href="bluetelnet.jpeg"><img style="width:793.984375px" src="bluetelnet.jpeg"/></a></figure><p id="2bd3c2ec-6456-80e3-b7a5-d750680459f8" class="" dir="auto">Testing Telnet connectivity</p><p id="2bd3c2ec-6456-8075-8a27-ce06c0022da9" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-809e-947d-faef3241880d" class="image" data-notion-image="sshred.jpeg" dir="ltr"><a href="sshred.jpeg"><img style="width:548.984375px" src="sshred.jpeg"/></a></figure><p id="2bd3c2ec-6456-80d5-b511-f1ab54694ed7" class="" dir="auto">SSH configuration on Red Router </p><p id="2bd3c2ec-6456-8037-88c6-c27bd7531887" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8058-9830-ca957a20c746" class="image" data-notion-image="sshredtoyellow.jpeg" dir="ltr"><a href="sshredtoyellow.jpeg"><img style="width:548.984375px" src="sshredtoyellow.jpeg"/></a></figure><p id="2bd3c2ec-6456-80c6-8993-f16c476ed8ba" class="" dir="auto">Testing SSH connectivity from Red LAN to Yellow LAN</p><p id="2bd3c2ec-6456-8098-a844-e68f49994021" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-8031-8619-d7a76d93c025" class="image" data-notion-image="sshyellowtored.jpeg" dir="ltr"><a href="sshyellowtored.jpeg"><img style="width:793.984375px" src="sshyellowtored.jpeg"/></a></figure><p id="2bd3c2ec-6456-808e-81c7-eba836483cb6" class="" dir="auto">Testing SSH connectivity from Yellow LAN to Red LAN </p><p id="2bd3c2ec-6456-804c-bc43-e34832a41fe2" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8046-9794-c23f8d9696a1" class="" dir="auto"><strong>Step 4: Static Routing configuration</strong></p><p id="2bd3c2ec-6456-80d7-a889-ceb1cf1b436e" class="" dir="auto">Static routing is the process of manually adding IP routes to a router so it knows how to reach specific networks.</p><figure id="2bd3c2ec-6456-802f-b530-e61bac2aebad" class="image" data-notion-image="iproute%202.jpeg" dir="ltr"><a href="iproute%202.jpeg"><img style="width:793.984375px" src="iproute%202.jpeg"/></a></figure><p id="2bd3c2ec-6456-8045-8403-fa0eb08c37e3" class="" dir="auto">IP Route configuration example on the Red Router </p><p id="2bd3c2ec-6456-80f9-9705-f20d6301776d" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80de-af2c-c4f4695856a8" class="" dir="auto"><strong>Step 5: Testing connectivity </strong></p><p id="2bd3c2ec-6456-80c2-a04a-f10fc168fd76" class="" dir="auto">In this step I used the web browser tool on a PC to test application-layer connectivity.</p><figure id="2bd3c2ec-6456-80c8-8bbe-f65a7d41657e" class="image" data-notion-image="bluegoogle.jpeg" dir="ltr"><a href="bluegoogle.jpeg"><img style="width:793.984375px" src="bluegoogle.jpeg"/></a></figure><p id="2bd3c2ec-6456-805e-8e03-fa061d458d70" class="" dir="auto">Blue PC connectivity </p><p id="2bd3c2ec-6456-80ab-94ea-fc3c5c7d9989" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-800d-843f-c08a53a47696" class="image" data-notion-image="redfacebook.jpeg" dir="ltr"><a href="redfacebook.jpeg"><img style="width:793.984375px" src="redfacebook.jpeg"/></a></figure><p id="2bd3c2ec-6456-8044-8ee6-e11150d90238" class="" dir="auto">Red PC connectivity</p><p id="2bd3c2ec-6456-8097-9bd7-d1d5080d5973" class="" dir="auto">In this lab, I successfully configured static routing to facilitate communication across multiple networks. I validated remote management capabilities by testing both Telnet and SSH access to the routers. Finally, I confirmed end-to-end connectivity by accessing web servers from each PC, demonstrating full network integration and functionality.</p><p id="2bd3c2ec-6456-8022-a278-c64273a0eaff" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8098-8278-df04d0020282" class="" dir="auto">To review or simulate the network, download the attached <code>.pkt</code> file and open it using Cisco Packet Tracer software.</p><figure id="2bd3c2ec-6456-80fb-a063-d622a52d9400" dir="ltr"><div class="source"><a href="Lab_2_-_Static_Routes_-_Basics.pkt" data-notion-file="Lab_2_-_Static_Routes_-_Basics.pkt" data-notion-file-alias="Lab #2 - Static Routes - Basics.pkt">Lab #2 - Static Routes - Basics.pkt</a></div></figure><p id="2bd3c2ec-6456-8040-b2c8-da4a02cc39fa" class="" dir="auto">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

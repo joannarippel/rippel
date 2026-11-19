@@ -1,0 +1,86 @@
+﻿Name,Level of expertise,Project Description
+Linux filesystem and permissions exercise,Linux,
+Linux : Working with Command Output and Text Manipulation,Linux,
+Practical Exercise on Linux File and Folder Operations,Linux,
+Scripting exercises,Scripting,
+,,
+Lab 1 - Basic commads in Cisco Packet Tracer,Networking,"Laboratory 1 introduces students to Cisco Packet Tracer and the basic CLI steps used to set up routers and switches. The lab focuses on understanding the workspace and performing simple device configuration.
+Objectives
+• Learn the Packet Tracer interface: add devices, place them on the workspace, and connect them with cables.
+• Open the CLI and move between User mode and Privileged mode.
+• Practice key commands:
+enable, configure terminal, hostname, banner motd, exit, end.
+• Do basic setup: set a hostname, add simple passwords, save the configuration, and test connectivity with ping.
+Skills Gained
+• Navigating Packet Tracer
+• Using essential CLI commands
+• Understanding device modes
+• Applying minimal initial configuration and security
+Audience
+Beginners and students who want a simple introduction to configuring Cisco devices in a simulation environment.
+
+"
+Lab 2 – Static Routes: Basic Connectivity,Networking,"Laboratory 2 – Static Routing (Short Version)
+
+This lab teaches how to connect different networks in Cisco Packet Tracer using static routes.
+What you will learn:
+
+• What static routing is and how it works.
+
+• How to use ip route to tell routers exactly where to send traffic.
+
+• How to test connections with ping and traceroute.
+
+• How to fix routing problems caused by wrong settings.
+
+• How to link multiple subnets so they can communicate.
+After the lab you can:
+
+• Explain when static routing is useful.
+
+• Add and check static routes on Cisco routers.
+
+• Solve simple routing and connectivity issues.
+
+• Build small network topologies where all devices can reach each other.
+Who it's for:
+
+Beginners and students who want practical experience with basic IP routing in Packet Tracer.
+
+"
+Lab 3 - Static Routing Configuration and End-to-End Connectivity Setup,Networking,"Laboratory 3 – Advanced Network Setup (Short Version)
+
+This lab gives practical experience building more complex networks in Cisco Packet Tracer.
+What you will learn:
+
+• How to configure routers and switches, including interfaces, VLANs, and inter-VLAN routing.
+
+• How to use static routing together with other routing methods.
+
+• How to check and troubleshoot the network with ping, traceroute, and show commands.
+
+• How to add basic security: passwords, access rules, and saving configurations.
+
+• How to build a multi-layer network that looks more like a real setup.
+After the lab you can:
+
+• Configure advanced settings on Cisco devices.
+
+• Make different network segments communicate correctly.
+
+• Find and fix routing and configuration problems.
+
+• Use good practices for network structure and security.
+Who it's for:
+
+Students and beginners/intermediate learners who want hands-on experience with more realistic network designs.
+
+"
+Basic VLAN Configuration and Trunking,Networking,
+Linux Networking Lab,Linux,
+NMAP scanning exercises,Linux,
+DoS Attacks exercises,Cyber Attacks,Done
+MITM Attacks exercises,Cyber Attacks,In progress
+Password Attacks Simulations,Cyber Attacks,in progress
+Application Security,,
+"WordPress Security Hardening ",Application Security,

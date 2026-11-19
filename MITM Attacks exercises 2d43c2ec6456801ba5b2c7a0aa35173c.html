@@ -1,0 +1,948 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>MITM Attacks exercises</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="2d43c2ec-6456-801b-a5b2-c7a0aa35173c" class="page sans"><header><h1 class="page-title" dir="auto">MITM Attacks exercises</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/arrow-circle-down_gray.svg" style="width:14px;height:14px;display:block"/></span>Level of expertise</th><td><span class="selected-value select-value-color-gray">Cyber Attacks</span></td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Project Description</th><td><mark class="highlight-blue" data-notion-highlight="blue"><strong>In progress</strong></mark></td></tr></tbody></table></header><div class="page-body"><p id="2dc3c2ec-6456-8041-ba7d-ed3d8bf82558" class="" dir="auto">
+</p><p id="2dc3c2ec-6456-808b-b72d-c47c13f0bb8c" class="" dir="auto">In the following exercises I will explore/simulate<mark class="highlight-default" data-notion-highlight="default"> MITM attacks using the tools yersinia and arpspoof</mark></p><h2 id="2dc3c2ec-6456-80a2-986e-e41249be8aa1" class="" dir="auto">Lab Setup </h2><p id="2dc3c2ec-6456-8003-aaba-d6ec196969f8" class="" dir="auto"><strong>Overview:</strong><br/>The testing environment is designed as a hybrid lab to demonstrate Man-in-the-Middle (MITM) attacks on both virtualized and physical endpoints.</p><p id="2dc3c2ec-6456-8057-a4d3-c52d842fa3f7" class="" dir="auto">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="2dc3c2ec-6456-808d-988c-d3a4a9f0d863" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">                     Internet
+                         |
+                    [ Ethernet cable / Router ]
+                         |
+    ------------------------------------------------
+    |                                              |                                             
+ [ windows laptop ]                         [ Kali Linux Host ]
+     victim                                     Attacker 
+                           
+                                               </code></pre><p id="2dc3c2ec-6456-800c-a7a8-e16e5e72998f" class="" dir="auto">
+</p><p id="2dc3c2ec-6456-8010-a150-e2ecdb7a9c2c" class="" dir="auto">
+</p><p id="2dc3c2ec-6456-80ff-8f5c-fede4d496799" class="" dir="auto"><strong>Network Components:</strong></p><ul id="2dc3c2ec-6456-80ef-9a6f-fa89c27a47d5" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Attacker Node:</strong> Kali Linux (Host) – The central platform for traffic interception and analysis.</li></ul><ul id="2dc3c2ec-6456-804b-ac8e-c15d62c1e542" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Victim :</strong> Laptop (Windows OS) </li></ul><p id="2dc3c2ec-6456-802f-ab43-d0d693322fa9" class="" dir="auto">
+</p><h3 id="2dc3c2ec-6456-80bd-8d15-fe4e7c9cc5f0" class="" dir="auto">Exercise 1: Configuration &amp; Tool Verification</h3><p id="2dc3c2ec-6456-800d-9cef-c82c47e7c30f" class="" dir="auto"><strong>Objective:</strong><br/>To initialise the environment and confirm the operational status of the MITM toolkit.</p><p id="2dc3c2ec-6456-8014-804b-d064eaceda62" class="" dir="auto"><strong>Step 1: System and Interface Verification</strong></p><p id="2dc3c2ec-6456-802b-a702-c9ca4e2b5100" class="" dir="auto">I verified the network configuration for both target scenarios. Connectivity was confirmed using the <mark class="highlight-default" data-notion-highlight="default"><code>ping</code></mark><mark class="highlight-default" data-notion-highlight="default"> </mark>utility to ensure the attacker can reach the intended victim.</p><p id="2f33c2ec-6456-80d0-996c-e7e4c8998c63" class="" dir="auto">
+</p><figure id="2f33c2ec-6456-80db-aa09-dadb21ce9ca6" class="image" data-notion-image="kali_to_windowsping.png" dir="ltr"><a href="kali_to_windowsping.png"><img style="width:710px" src="kali_to_windowsping.png"/></a></figure><p id="2f33c2ec-6456-800c-a4af-df6ea8c12870" class="" dir="auto">
+</p><figure id="2f33c2ec-6456-8072-af1a-f3db9e6b7b33" class="image" data-notion-image="windows_ping2.png" dir="ltr"><a href="windows_ping2.png"><img style="width:710px" src="windows_ping2.png"/></a></figure><p id="2f93c2ec-6456-8073-9384-e58e664c95ac" class="" dir="auto">
+</p><p id="2dc3c2ec-6456-809e-b909-d65ed5612134" class="" dir="auto"><strong>Step 2: Tool Readiness (MITM Suite)</strong></p><p id="2dc3c2ec-6456-80ea-87fb-d0e050385b06" class="" dir="auto">I confirmed that the essential utilities for ARP poisoning and protocol manipulation are correctly installed and accessible via the command line.</p><figure id="2dc3c2ec-6456-8069-820f-fe091257463f" class="image" data-notion-image="ex1_toolskali.png" dir="ltr"><a href="ex1_toolskali.png"><img style="width:443px" src="ex1_toolskali.png"/></a></figure><p id="2dc3c2ec-6456-801a-8c27-e930239df289" class="" dir="auto">
+</p><h3 id="2ec3c2ec-6456-80e6-98f9-dc9127195db4" class="" dir="auto">Exercise 2: Identifying network devices</h3><p id="2ec3c2ec-6456-8095-929e-c142890d33f4" class="" dir="auto">Use the <mark class="highlight-default" data-notion-highlight="default"><code>arp-scan</code></mark> command to identify the devices connected to your test network. Note the IP addresses and MAC addresses of these devices.</p><figure id="2f33c2ec-6456-8027-927a-e665d33f947c" class="image" data-notion-image="arpscan_new.png" dir="ltr"><a href="arpscan_new.png"><img style="width:710px" src="arpscan_new.png"/></a></figure><p id="2ec3c2ec-6456-8008-bd15-d3bb65dc10e0" class="" dir="auto">arp scan of local network <br/></p><table id="2ec3c2ec-6456-8033-bd44-cfaf90213cc8" class="simple-table" dir="ltr"><tbody><tr id="2ec3c2ec-6456-8052-a67e-e744fa4f0e56" dir="ltr"><td id="h_uX" class=""><strong>Device</strong></td><td id="==]|" class=""><strong>IP Address</strong></td><td id="j=fw" class=""><strong>MAC Address</strong></td></tr><tr id="2ec3c2ec-6456-80b4-83f9-df77c4a143ff" dir="ltr"><td id="h_uX" class=""><strong>Gateway (Router)</strong></td><td id="==]|" class="">192.168.0.1</td><td id="j=fw" class="">5c:4d:bf:85:bd:ac </td></tr><tr id="2ec3c2ec-6456-8040-8e2d-c3ab327f6c9e" dir="ltr"><td id="h_uX" class=""><strong>Target (Laptop Windows)</strong></td><td id="==]|" class="">192.168.0.4</td><td id="j=fw" class="">b4:b6:86:10:53:41   </td></tr><tr id="2ec3c2ec-6456-8051-9692-edc72f88fc58" dir="ltr"><td id="h_uX" class=""><strong>Attacker (Kali)</strong></td><td id="==]|" class="">192.168.0.6</td><td id="j=fw" class="">c8:b2:9b:3e:21:d7 </td></tr><tr id="2ed3c2ec-6456-806f-a489-c3040b4c431b" dir="ltr"><td id="h_uX" class=""></td><td id="==]|" class=""></td><td id="j=fw" class="">  </td></tr></tbody></table><h3 id="2ec3c2ec-6456-8084-9704-cabaa55ba875" class="" dir="auto">Exercise 3 - Launching an ARP Spoofing attack with arpspoof</h3><p id="2ed3c2ec-6456-80f7-804a-fcb6a35ed169" class="" dir="auto">Use <mark class="highlight-default" data-notion-highlight="default"><code>arpspoof</code></mark><mark class="highlight-default" data-notion-highlight="default"> </mark>to perform an ARP Spoofing attack, intercepting the traffic between two devices in your test network. Monitor the traffic to confirm the success of the attack.</p><p id="2ed3c2ec-6456-8083-a9e5-e9b4ff6a88b9" class="" dir="auto"><strong>Before Attack </strong></p><p id="2ed3c2ec-6456-8017-bf1b-ffc9724e2e91" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">The Windows ARP table correctly mapped the Gateway to its physical MAC address</mark></p><p id="2f53c2ec-6456-808d-9cb3-ea36d8643e8c" class="" dir="auto">
+</p><figure id="2f43c2ec-6456-8007-97ba-c4a5af4a1a6d" class="image" data-notion-image="windows_before.png" dir="ltr"><a href="windows_before.png"><img style="width:790.984375px" src="windows_before.png"/></a></figure><p id="2ed3c2ec-6456-80b0-9bc3-f5e0db213771" class="" dir="auto">windows arp screenshot </p><p id="2ed3c2ec-6456-808b-99e5-ef603384136f" class="" dir="auto">
+</p><p id="2ed3c2ec-6456-8072-945a-d63399540adf" class="" dir="auto"><strong>IP Forwarding:</strong> Enabled kernel-level packet forwarding to ensure the target maintained internet connectivity during interception using the command : <mark class="highlight-default" data-notion-highlight="default">sysctl  -w  net.ipv4.ip_forward=1</mark></p><p id="2ed3c2ec-6456-807b-903b-e957110e7fc1" class="" dir="auto"><strong>During Attack </strong></p><p id="2ed3c2ec-6456-8022-923d-c5e1e500d2ae" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">I launched two </mark><mark class="highlight-default" data-notion-highlight="default"><code>arpspoof</code></mark><mark class="highlight-default" data-notion-highlight="default"> sessions on the eth0 interface to intercept traffic in both directions:</mark></p><ul id="2ed3c2ec-6456-80da-9a65-c2c59ae0e276" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">To Target: </mark><mark class="highlight-default" data-notion-highlight="default"><code>sudo arpspoof -i eth0 -t victim_ip router:ip</code></mark></li></ul><ul id="2ed3c2ec-6456-80b8-b7bc-cadf9860f24f" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default">To Gateway: </mark><mark class="highlight-default" data-notion-highlight="default"><code>sudo arpspoof -i eth0 -t router_ip victim_ip</code></mark></li></ul><p id="2ed3c2ec-6456-80bf-bc99-c88ce249d6e5" class="" dir="auto">
+</p><p id="2ed3c2ec-6456-8034-ad6a-c7c920a35dd1" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default"> After initiating the attack, the Windows ARP table showed a MAC Address Conflict. Both the Gateway  and the Attacker shared the exact same MAC address: 2c-f0-5d-5e-d2-cb.</mark></p><p id="2ed3c2ec-6456-8012-9ff6-dd99e526bd76" class="" dir="auto">
+</p><figure id="2f43c2ec-6456-800c-b57c-ef8687c97cfc" class="image" data-notion-image="during_windows_new.png" dir="ltr"><a href="during_windows_new.png"><img style="width:664px" src="during_windows_new.png"/></a></figure><p id="2ed3c2ec-6456-8016-98c6-fb6f95667605" class="" dir="auto">poisoned arp table on windows host</p><p id="2ed3c2ec-6456-8085-b013-db604760eeda" class="" dir="auto">
+</p><figure id="2f43c2ec-6456-8058-a306-fd05951e6542" class="image" data-notion-image="arp_new.png" dir="ltr"><a href="arp_new.png"><img style="width:790.984375px" src="arp_new.png"/></a></figure><p id="2ed3c2ec-6456-80c2-b3fd-cbbefc5308a3" class="" dir="auto">kali traffic monitoring during attack </p><p id="2ed3c2ec-6456-80c3-a541-cec07ac9f89d" class="" dir="auto">
+</p><p id="2ed3c2ec-6456-8032-8b74-d8b44e7132e8" class="" dir="auto">Wireshark captured repeated forged ARP reply packets claiming the gateway IP address with the attacker’s MAC address. </p><h3 id="2ed3c2ec-6456-8007-ba76-e414f4ee0fcc" class="" dir="auto">Exercise 4: Packet Capture with Wireshark</h3><p id="2ed3c2ec-6456-8064-8b23-da4b8c316c86" class="" dir="auto">Use Wireshark to capture the packets sent between two devices during an ARP Spoofing attack. Identify the relevant packets and analyze their contents.</p><p id="2ed3c2ec-6456-80a7-90fe-e56b5cbed34d" class="" dir="auto"><strong>Before Attack</strong></p><p id="2ed3c2ec-6456-8051-b3c4-fe9fb941ce97" class="" dir="auto">I opened Wireshark on the Kali Desktop and filtered for HTTP traffic </p><p id="2ed3c2ec-6456-809d-ae8f-ec2078492b2a" class="" dir="auto">Since the network was not yet poisoned, the Windows traffic was going directly to the router, bypassing Kali machine entirely.</p><figure id="2f43c2ec-6456-8040-9c43-c3d5e467a591" class="image" data-notion-image="wireshark_before.png" dir="ltr"><a href="wireshark_before.png"><img style="width:790.984375px" src="wireshark_before.png"/></a></figure><p id="2f43c2ec-6456-80ba-8341-f9873f51ed31" class="" dir="auto">
+</p><p id="2ed3c2ec-6456-80a8-8796-cbbe9dc59ec7" class="" dir="auto"><strong>During Attack </strong></p><p id="2ee3c2ec-6456-8055-a6ec-eb2c84a5b15f" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">I initiated the </mark><mark class="highlight-default" data-notion-highlight="default"><code>arpspoof</code></mark><mark class="highlight-default" data-notion-highlight="default"> attack and browsed to </mark><mark class="highlight-default" data-notion-highlight="default"><code>http://testphp.vulnweb.com</code></mark><mark class="highlight-default" data-notion-highlight="default"> on the victim Windows machine. I entered a test username and password into the login form.</mark></p><p id="2ee3c2ec-6456-801c-8ad3-d74f1bc64465" class="" dir="auto"> </p><figure id="2f43c2ec-6456-8024-bfd5-f8a396eddf73" class="image" data-notion-image="during_windows.png" dir="ltr"><a href="during_windows.png"><img style="width:790.984375px" src="during_windows.png"/></a></figure><p id="2ee3c2ec-6456-80d5-bb20-fbb17aa53c70" class="" dir="auto">
+</p><p id="2ee3c2ec-6456-8057-9114-c5702e0e2172" class="" dir="auto">
+</p><p id="2ed3c2ec-6456-80c7-844d-e8c26ab33012" class="" dir="auto"> Wireshark immediately began capturing all HTTP packets from the Windows machine.</p><p id="2ee3c2ec-6456-8046-b9db-dae5d3a0364e" class="" dir="auto">By selecting the <strong>&quot;Follow HTTP Stream&quot;</strong> option in Wireshark, I could see the <strong>&quot;Entire Info&quot;</strong> of the session. Because the site is unencrypted, the <strong>test credentials (username: test and password: test)</strong> were clearly visible in plain text.</p><figure id="2f43c2ec-6456-8058-99c6-ed4145382be4" class="image" data-notion-image="during_attack_arp.png" dir="ltr"><a href="during_attack_arp.png"><img style="width:790.984375px" src="during_attack_arp.png"/></a></figure><p id="2ed3c2ec-6456-806d-b4b5-c7fb2c41a4f4" class="" dir="auto">username &amp; pass visible </p><p id="2ee3c2ec-6456-8005-b3e8-d20f299e8236" class="" dir="auto">
+</p><p id="2ee3c2ec-6456-80ac-850f-eb83838129c9" class="" dir="auto"><strong>Conclusion</strong></p><p id="2ee3c2ec-6456-80fe-9c62-cd45325c3deb" class="" dir="auto">This exercise demonstrated that <strong>ARP Spoofing</strong> is a highly effective method for intercepting network traffic. By tricking the target machine into sending its data to the attacker instead of the router, I was able to establish a <strong>Man-in-the-Middle (MITM)</strong> position.</p><p id="2ee3c2ec-6456-80ec-ac27-c045e45d8443" class="" dir="auto">The most important finding was that any data sent over an <strong>unencrypted HTTP connection</strong>—including usernames and passwords—is completely visible in plain text to the attacker. It proves that <strong>encryption (HTTPS)</strong> is the only way to ensure data privacy on a local network.</p><h3 id="2f33c2ec-6456-8088-8e95-ceaeb843574d" class="" dir="auto">Exercise 5: Launching a DHCP Starvation Attack with Yersinia</h3><p id="2f33c2ec-6456-80d8-a708-ff98aa8dddf3" class="" dir="auto"><strong>Instruction:</strong><br/>Use <strong>Yersinia</strong> to perform a <strong>DHCP Starvation</strong> attack within your test network. Monitor network activity to observe the effects of this attack.</p><p id="2f33c2ec-6456-80d8-b396-e02275b7b774" class="" dir="auto"><strong>Before Attack </strong></p><p id="2f53c2ec-6456-8033-952a-e61ee5e46799" class="" dir="auto">The victim machine had a valid DHCP lease and normal network connectivity. The DHCP server was configured with a smaller DHCP pool for testing purposes in order to accelerate exhaustion. </p><p id="2f53c2ec-6456-80af-8bfe-f82b78721af2" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-80d9-b5ed-d91a9bde528f" class="image" data-notion-image="beforeeth0.png" dir="ltr"><a href="beforeeth0.png"><img style="width:790.984375px" src="beforeeth0.png"/></a></figure><p id="2f53c2ec-6456-80e1-8b38-d0dc7cbaabad" class="" dir="auto">windows ip before attack</p><p id="2f53c2ec-6456-8038-a907-c5a0d766d12b" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-8010-84fb-e094edddd22d" class="image" data-notion-image="dhppool_6ip.png" dir="ltr"><a href="dhppool_6ip.png"><img style="width:790.984375px" src="dhppool_6ip.png"/></a></figure><p id="2f53c2ec-6456-80ee-ae0a-c6defe4450ef" class="" dir="auto">DHCP pool </p><p id="2f53c2ec-6456-80bb-bd6a-c80159c485ca" class="" dir="auto">
+</p><p id="2f53c2ec-6456-80b2-9532-fe6b1c9bf4ca" class="" dir="auto"><strong>During Attack </strong></p><p id="2f53c2ec-6456-800f-990e-c35c4592eca5" class="" dir="auto">Yersinia was used to perform a DHCP Starvation attack by sending large numbers of DHCP DISCOVER/REQUEST messages with spoofed MAC addresses. This activity exhausted the DHCP server’s available IP pool. While the attack was running, the victim attempted to obtain a new lease, but no DHCP OFFER was received.</p><figure id="2f53c2ec-6456-800c-ae36-fde06f527cb0" class="image" data-notion-image="wireshark2_thenew.png" dir="ltr"><a href="wireshark2_thenew.png"><img style="width:791px" src="wireshark2_thenew.png"/></a></figure><p id="2f53c2ec-6456-8068-b8d1-e1e19b08818d" class="" dir="auto">network activity during attack</p><p id="2f53c2ec-6456-80ff-9f99-f400cf3b4c8c" class="" dir="auto">
+</p><p id="2f53c2ec-6456-8019-97dc-c8b137d5f6ce" class="" dir="auto"><strong>After Attack </strong></p><p id="2f53c2ec-6456-8060-b397-eafca95f1772" class="" dir="auto">After running <mark class="highlight-default" data-notion-highlight="default"><code>ipconfig /release</code></mark> &amp;<mark class="highlight-default" data-notion-highlight="default"><code>ipconfig /renew</code></mark><mark class="highlight-default" data-notion-highlight="default"> </mark>on the victim machine, the DHCP request failed and the system assigned an APIPA address (169.254.x.x). No gateway or DNS information was provided and network connectivity was lost. This confirms the DHCP Starvation attack was successful.</p><figure id="2f53c2ec-6456-804b-95d0-c321ba263382" class="image" data-notion-image="windows_duringeth0.png" dir="ltr"><a href="windows_duringeth0.png"><img style="width:790.984375px" src="windows_duringeth0.png"/></a></figure><p id="2f53c2ec-6456-80b0-b05e-f0e5f9404fe8" class="" dir="auto">
+</p><h2 id="2f33c2ec-6456-80a4-ba90-ee44667d688a" class="" dir="auto">Intermediate Level Exercises:</h2><h3 id="2f33c2ec-6456-8072-b750-ec231c3e3a65" class="" dir="auto">Exercise 6 – Launching a Rogue DHCP Server Attack with Yersinia</h3><p id="2f33c2ec-6456-8036-b20a-facdb266dfba" class="" dir="auto"><strong>Instruction:</strong><br/>Configure <strong>Yersinia</strong> to generate a <strong>rogue DHCP server</strong> and launch the attack within your test network. Observe how the devices on the network interact with this fake server.</p><p id="2f53c2ec-6456-8080-96ed-e3d98e635970" class="" dir="auto"><em><mark class="highlight-red" data-notion-highlight="red">For this exercise, the DHCP service on the router was disabled to ensure that the rogue DHCP server (Yersinia) became the only DHCP responder on the network.</mark></em></p><p id="2f53c2ec-6456-808a-b951-ff40022de0c9" class="" dir="auto">
+</p><p id="2f53c2ec-6456-80ae-8be7-cdc32ca3641b" class="" dir="auto"><strong>Before Attack</strong> </p><p id="2f53c2ec-6456-808e-bb39-c5194838b63a" class="" dir="auto">Before the rogue DHCP server was launched, the Windows client obtained its network configuration from the legitimate home router. Wireshark captured standard DHCP traffic on the LAN. The client broadcasted DHCP <strong>DISCOVER</strong> and <strong>REQUEST</strong> messages to <mark class="highlight-default" data-notion-highlight="default"><code>255.255.255.255</code></mark>, and only the legitimate router responded with valid DHCP offers.</p><p id="2f53c2ec-6456-8093-b299-d819c85707e0" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-8039-ac3a-f6efc39b8304" class="image" data-notion-image="beforeeth0%201.png" dir="ltr"><a href="beforeeth0%201.png"><img style="width:790.984375px" src="beforeeth0%201.png"/></a></figure><p id="2f53c2ec-6456-8029-b7d0-e00cd7346440" class="" dir="auto">
+</p><p id="2f53c2ec-6456-8084-9968-f2a254eb73fb" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-803d-886c-cb1179fae834" class="image" data-notion-image="wireshark_before%201.png" dir="ltr"><a href="wireshark_before%201.png"><img style="width:790.984375px" src="wireshark_before%201.png"/></a></figure><p id="2f53c2ec-6456-80c9-91ef-dd9af06b0795" class="" dir="auto">
+</p><p id="2f53c2ec-6456-8091-b95e-f6444c232c3d" class="" dir="auto"><strong>During Attack</strong></p><p id="2f53c2ec-6456-805b-85f9-ca77d11aaf32" class="" dir="auto">Yersinia was launched in DHCP server mode. Wireshark showed DHCP OFFER and DHCP ACK messages originating from the rogue server (<mark class="highlight-default" data-notion-highlight="default"><code>192.168.0.6</code></mark>) to the broadcast address.</p><p id="2f53c2ec-6456-8042-93d1-f20f550c1d27" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-80c6-9a51-f210700751df" class="image" data-notion-image="yersiniaserver.png" dir="ltr"><a href="yersiniaserver.png"><img style="width:790.96875px" src="yersiniaserver.png"/></a></figure><p id="2f53c2ec-6456-8083-a81b-c1c3a2569815" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-8099-b2c0-c81397765b34" class="image" data-notion-image="kaliduringattack.png" dir="ltr"><a href="kaliduringattack.png"><img style="width:790.96875px" src="kaliduringattack.png"/></a></figure><p id="2f53c2ec-6456-808e-8e71-c0062db2fd8f" class="" dir="auto">traffic monitoring during attack </p><p id="2f53c2ec-6456-8074-81ba-c7c7ce63eb7d" class="" dir="auto">
+</p><p id="2f53c2ec-6456-80a7-9747-ed37e7216e92" class="" dir="auto"><strong>After Attack</strong></p><p id="2f53c2ec-6456-80a7-ab1f-e14b35f2c0d8" class="" dir="auto">
+</p><figure id="2f53c2ec-6456-8044-a3a6-dea499809500" class="image" data-notion-image="windowsip_after.png" dir="ltr"><a href="windowsip_after.png"><img style="width:790.984375px" src="windowsip_after.png"/></a></figure><p id="2f53c2ec-6456-8030-b504-dec737561176" class="" dir="auto">
+</p><p id="2f53c2ec-6456-80a2-93ea-d86b7001949b" class="" dir="auto">T<mark class="highlight-default" data-notion-highlight="default">he Windows client accepted the rogue DHCP configuration. </mark><mark class="highlight-default" data-notion-highlight="default"><code>ipconfig /all</code></mark><mark class="highlight-default" data-notion-highlight="default"> shows that both the default gateway and DHCP server were set to the attacker’s IP (</mark><mark class="highlight-default" data-notion-highlight="default"><code>192.168.0.6</code></mark><mark class="highlight-default" data-notion-highlight="default">) and DNS was changed to </mark><mark class="highlight-default" data-notion-highlight="default"><code>8.8.8.8</code></mark><mark class="highlight-default" data-notion-highlight="default">. The attack was successful, as the victim obtained its network settings from the rogue DHCP server instead of the legitimate router.</mark></p><p id="2f63c2ec-6456-80d2-8e51-d50263ffada9" class="" dir="auto">
+</p><p id="2f63c2ec-6456-806c-a304-c31dda3450c4" class="" dir="auto"><strong>Exercise 7 – Analysis of the effects of a MITM attack on network traffic</strong></p><p id="2f63c2ec-6456-8031-a41f-de4ea0fe35da" class="" dir="auto">Use Wireshark to analyze the traffic between a client and a server during a Man-in-the-Middle (MITM) attack. Identify the vulnerabilities exploited and the effects on data confidentiality and integrity.</p><p id="2f63c2ec-6456-8038-b09d-d06e01507c7a" class="" dir="auto">
+</p><p id="2f63c2ec-6456-803d-92ae-e1b1870e119d" class="" dir="auto"><strong>MITM Attack via Evil Twin </strong></p><p id="2f63c2ec-6456-80bf-9f0a-dc890e5adaa7" class="" dir="auto"><strong>Attack scenario</strong></p><p id="2f63c2ec-6456-807f-bcd7-dcbeba90c36b" class="" dir="auto">In this scenario, the Windows laptop acts as the client (victim).</p><p id="2f63c2ec-6456-8097-aa46-e69bd733ac97" class="" dir="auto">The attacker impersonates a legitimate wireless access point by broadcasting a cloned SSID. A fake HTTP server is then used to deliver a phishing portal or intercept traffic after the victim connects.</p><p id="2f63c2ec-6456-8000-9726-dadb8e1865be" class="" dir="auto">Traffic between the client and the attacker-controlled server was captured and analyzed using Wireshark during the MITM attack.</p><p id="2fa3c2ec-6456-802b-b98e-d79c95cf7500" class="" dir="auto">Before creating the Evil Twin access point, the attacker scanned nearby wireless networks to determine the legitimate network’s operating channel.</p><p id="2fa3c2ec-6456-8020-b691-f33e8308ca0d" class="" dir="auto">Command used:</p><pre id="2fa3c2ec-6456-8033-ba06-e01b3bd57685" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">sudo airodump-ng wlan0mon</code></pre><p id="2fa3c2ec-6456-8049-9ba3-f577887cdcf5" class="" dir="auto">The detected channel was used when creating the Evil Twin access point.</p><p id="2f63c2ec-6456-80a5-9662-c19a119a5c2a" class="" dir="auto">I performed the attack using a dual-interface setup and  Wifiphisher.</p><p id="2fa3c2ec-6456-80e2-bd2f-d22f3fbbe095" class="" dir="auto">One wireless interface broadcast the rogue access point while a secondary interface was used to send deauthentication frames to the legitimate network. This forced nearby clients to disconnect and increased the likelihood of connecting to the cloned access point.</p><p id="2fa3c2ec-6456-8018-ba53-c71a7ff65334" class="" dir="auto">A rogue access point cloned the legitimate SSID &quot;Omni DUO_4B8348&quot; and the victim (Windows laptop) connected to the attacker-controlled AP.</p><p id="2fa3c2ec-6456-8087-86d9-f7af99f84c65" class="" dir="auto">This architecture reflects real-world Evil Twin attacks where impersonation and disruption are separated.</p><p id="2f63c2ec-6456-8023-9b7f-c881260a38cb" class="" dir="auto">
+</p><figure id="2fa3c2ec-6456-80fc-91e5-db644d3ee315" class="image" data-notion-image="evil_twin.png" dir="ltr"><a href="evil_twin.png"><img style="width:709.984375px" src="evil_twin.png"/></a></figure><p id="2f63c2ec-6456-8050-b348-cd341a8484a3" class="" dir="auto"><em>Wifiphisher Evil Twin running</em></p><p id="2f63c2ec-6456-808c-be49-dc0289465eb3" class="" dir="auto">
+</p><p id="2f63c2ec-6456-8011-8a7d-cfba755f22bd" class="" dir="auto"><strong>Victim network configuration (client perspective)</strong></p><p id="2f63c2ec-6456-8099-bbb4-c8e214268481" class="" dir="auto">On the victim, Windows shows &quot;Action needed, no internet&quot; while connected to the cloned SSID. The victim received IPv4 address 10.0.0.88 and used 10.0.0.1 as Default Gateway, DHCP server, and DNS server (attacker-controlled network services).</p><p id="2f63c2ec-6456-8005-a876-c01ccef846c3" class="" dir="auto">
+</p><figure id="2fa3c2ec-6456-80ec-ac46-cc3a79d307c3" class="image" data-notion-image="windows_eviltwin.png" dir="ltr"><a href="windows_eviltwin.png"><img style="width:709.984375px" src="windows_eviltwin.png"/></a></figure><p id="2fa3c2ec-6456-80e4-b97a-d312fa76fa76" class="" dir="auto">
+</p><p id="2f63c2ec-6456-80f3-836a-dc7c4926fc72" class="" dir="auto"><em>Victim Windows view: connected to cloned SSID </em></p><p id="2f63c2ec-6456-807b-8b7c-ec67d8e807fa" class="" dir="auto">
+</p><p id="2f63c2ec-6456-8040-9699-ce97923cd361" class="" dir="auto"><strong>Wireshark evidence (traffic analysis)</strong><br/>Wireshark capture on the attacker interface (wlan0) shows HTTP traffic between the victim (10.0.0.88) and the attacker (10.0.0.1). Most importantly, an HTTP POST request contains the credential field &quot;wfphshr-wpa-testpassword&quot; in plaintext.</p><figure id="2fa3c2ec-6456-8022-9f1d-c278d15eb827" class="image" data-notion-image="credentilasnew.png" dir="ltr"><a href="credentilasnew.png"><img style="width:709.96875px" src="credentilasnew.png"/></a></figure><p id="2f63c2ec-6456-804d-bb5f-cc16e6a64b92" class="" dir="auto">
+</p><p id="2f63c2ec-6456-804c-b1e2-eb95a506cfa4" class="" dir="auto"><strong>Captured credentials (attacker view)</strong></p><p id="2f63c2ec-6456-807a-8941-d04c2ebd1f44" class="" dir="auto">Wifiphisher logs the submitted passwords from the phishing page, confirming successful credential harvesting during the MITM.</p><figure id="2fa3c2ec-6456-800d-9d4c-d375c2288710" class="image" data-notion-image="credentials_again.png" dir="ltr"><a href="credentials_again.png"><img style="width:709.984375px" src="credentials_again.png"/></a></figure><p id="2f63c2ec-6456-800f-871d-e4fd8c2271f3" class="" dir="auto">
+</p><p id="2f63c2ec-6456-8020-a97f-ffb42d73471b" class="" dir="auto">Vulnerabilities exploited</p><ul id="2f63c2ec-6456-805e-91f2-ecd42ab113c7" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Lack of access point authentication (SSID trust): the client trusted the SSID name and connected to the rogue AP.</li></ul><ul id="2f63c2ec-6456-806a-bbd2-ce14fe913cbb" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Unencrypted captive portal (HTTP): credentials were submitted without HTTPS encryption and were visible in packet capture.</li></ul><ul id="2f63c2ec-6456-80aa-8c31-dc408aaf8a6f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Social engineering: the Network Manager Connect field tricked the user into entering the Wi-Fi password.</li></ul><p id="2f63c2ec-6456-806a-9280-d802a5c7adcb" class="" dir="auto">Impact on confidentiality and integrity</p><ul id="2f63c2ec-6456-80c0-ab0b-c2e99e97383e" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Confidentiality:<br/>Compromised — the password field (wfphshr-wpa-password) was captured in plaintext and logged by Wifiphisher</li></ul><ul id="2f63c2ec-6456-80e4-8abd-d208c598b3cd" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Integrity:<br/>Compromised — victim traffic was redirected to attacker-controlled services gate teway/DHCP/DNS = 10.0.0.1; </li></ul><ul id="2f63c2ec-6456-806e-be84-ea1e03b7a55a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Availability:<br/>Partially affected — the victim reported no internet during the  captive portal phase.</li></ul><p id="2f63c2ec-6456-800a-8818-ca35fca7e6e3" class="" dir="auto"><strong>Conclusion</strong></p><p id="2f63c2ec-6456-8074-be6d-cba071295dd0" class="" dir="auto">The exercise successfully demonstrated that by exploiting a lack of AP authentication and insecure protocols (HTTP), an attacker can:</p><ol type="1" id="2f63c2ec-6456-80e7-9a9d-e4eea1aa1683" class="numbered-list" start="1" dir="auto"><li>Break Integrity: By redirecting traffic to rogue infrastructure</li></ol><ol type="1" id="2f63c2ec-6456-804c-9a82-e89227814049" class="numbered-list" start="2" dir="auto"><li>Break Confidentiality: By capturing credentials in plaintext.</li></ol><p id="2f63c2ec-6456-8067-a32f-e46684c014e0" class="" dir="auto"><strong>Mitigation:</strong> Use <strong>VPNs</strong> for end-to-end encryption </p><h3 id="2f93c2ec-6456-80ee-9219-c4f3f37e70aa" class="" dir="auto">Exercise 8 - Implementing Protective Measures Against MITM Attacks:</h3><p id="2f93c2ec-6456-80ce-8aca-cfbb6fe5bc04" class="" dir="auto">Explore the available options and technologies to counteract <strong>Man-in-the-Middle (MITM)</strong> attacks within your test network. Configure security measures such as using the <strong>HTTPS</strong> protocol or implementing <strong>Network Level Authentication (NLA)</strong>.</p><p id="2f93c2ec-6456-80bf-a4d8-f81cdc3e439c" class="" dir="auto">This exercise documents security measures applied on a <strong>Windows 10/11 client</strong> to defend against Man-in-the-Middle (MITM) attacks previously demonstrated using <strong>Kali Linux</strong> tools in a local lab network.</p><p id="2f93c2ec-6456-8058-897a-cb2229f78d2a" class="" dir="auto"><strong>1. Defense Against ARP Spoofing</strong></p><p id="2f93c2ec-6456-804a-9f8d-eb1b1f620bb5" class="" dir="auto">Attack: ARP cache poisoning (Exercise 3)</p><p id="2f93c2ec-6456-80fc-a3b3-f2833735cd76" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Attacker tool: </mark><mark class="highlight-default" data-notion-highlight="default"><code>arpspoof</code></mark><mark class="highlight-default" data-notion-highlight="default"> (Kali Linux)</mark></p><p id="2f93c2ec-6456-80cf-aee6-c8cf461e25ec" class="" dir="auto"><strong>Before Defense</strong></p><p id="2f93c2ec-6456-8019-9c92-d7f3d17972ca" class="" dir="auto">The attacker sent forged ARP replies claiming ownership of the default gateway IP address, causing the gateway IP to be associated with the attacker’s MAC address in the victim’s ARP table.</p><p id="2f93c2ec-6456-80af-812e-c237d45a8d7a" class="" dir="auto">before ARP attack</p><figure id="2f93c2ec-6456-80d1-bd32-f94c7a9eb47f" class="image" data-notion-image="windows_before%201.png" dir="ltr"><a href="windows_before%201.png"><img style="width:709.984375px" src="windows_before%201.png"/></a></figure><p id="2f93c2ec-6456-803c-9b28-e1dfe8bf0314" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8064-a655-f254705bc5c7" class="" dir="auto">during ARP attack </p><figure id="2f93c2ec-6456-80d9-b2d3-e00278aadc4c" class="image" data-notion-image="during_windows_new%201.png" dir="ltr"><a href="during_windows_new%201.png"><img style="width:664px" src="during_windows_new%201.png"/></a></figure><p id="2f93c2ec-6456-8081-98bc-d47b9108ccbc" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80dc-ad5f-d72fd3b1f99c" class="" dir="auto"><strong>Mitigation: Static ARP Entry on Windows</strong></p><p id="2f93c2ec-6456-80e9-af00-c5ead7704a1f" class="" dir="auto">The attack succeeds because Windows normally updates ARP entries dynamically. By creating a <strong>static ARP neighbor entry</strong> for the default gateway, the client no longer accepts spoofed ARP replies.</p><p id="2f93c2ec-6456-8060-92e3-ea7358994351" class="" dir="auto"><strong>Steps (Windows – Administrator Command Prompt)</strong></p><p id="2f93c2ec-6456-8096-b4bf-d44b321f9769" class="" dir="auto">Identify the network interface index:</p><pre id="2f93c2ec-6456-802f-b6cf-dd09079d5762" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">netsh interface ipv4 show interfaces
+</code></pre><p id="2f93c2ec-6456-806d-a234-de2e081cb6ae" class="" dir="auto">Identify the gateway IP address and MAC address:</p><pre id="2f93c2ec-6456-8050-9a74-fc31f2be1954" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">arp -a</code></pre><p id="2f93c2ec-6456-8055-8fcc-c9c914279b29" class="" dir="auto">Lock the gateway IP to its legitimate MAC address:</p><pre id="2f93c2ec-6456-8094-8515-cea23cb0b41f" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">netsh interface ipv4 add neighbors &lt;Idx&gt;&quot;&lt;Gateway-IP&gt;&quot;&quot;&lt;Gateway-MAC&gt;&quot;</code></pre><p id="2f93c2ec-6456-80e7-b6d1-c19772ee7e54" class="" dir="auto">Example:</p><pre id="2f93c2ec-6456-809a-a475-cb256b2683e9" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">netsh interface ipv4 add neighbors12&quot;192.168.0.1&quot;&quot;5c-4d-bf-85-bd-ac&quot;</code></pre><p id="2f93c2ec-6456-8067-88d3-fbdcc1f48e96" class="" dir="auto">Verify the configuration:</p><pre id="2f93c2ec-6456-809b-95eb-e7890d1fb6b5" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">arp -a</code></pre><p id="2f93c2ec-6456-801e-ac52-dbc0c7648cb1" class="" dir="auto">The gateway entry is now marked as <strong>static</strong>.</p><figure id="2f93c2ec-6456-80e2-aa1a-e8cea46c81fe" class="image" data-notion-image="Screenshot_(76).png" dir="ltr"><a href="Screenshot_(76).png"><img style="width:710px" src="Screenshot_(76).png"/></a></figure><p id="2f93c2ec-6456-80c2-b13d-f7ee8c8ff372" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80b7-bc83-d85fe86f7a02" class="" dir="auto"><strong>Network-side (Router IP–MAC Binding)</strong></p><p id="3033c2ec-6456-80f5-bdc8-f05e7e69fcd1" class="" dir="auto">P–MAC binding was enabled on the router to permanently associate specific IP addresses with their legitimate MAC addresses. The router enforces these mappings and rejects traffic that does not match the configured bindings.</p><p id="3033c2ec-6456-804f-8bdf-ca6189c2a8c6" class="" dir="auto">This prevents an attacker from impersonating trusted devices on the network and blocks ARP spoofing attempts by ensuring that forged ARP claims are ignored.</p><figure id="2f93c2ec-6456-80bd-8984-e56a1750f11a" class="image" data-notion-image="Screenshot_2026-01-31_10-57-03.png" dir="ltr"><a href="Screenshot_2026-01-31_10-57-03.png"><img style="width:709.96875px" src="Screenshot_2026-01-31_10-57-03.png"/></a></figure><p id="2f93c2ec-6456-809d-83e7-c8aa5fdaff6a" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80ce-89c8-cdc440ea330e" class="" dir="auto"><strong>After Defense during ARP attack </strong></p><p id="2f93c2ec-6456-8001-8a7b-e50892baed2e" class="" dir="auto">When <mark class="highlight-default" data-notion-highlight="default"><code>arpspoof</code></mark><mark class="highlight-default" data-notion-highlight="default"> </mark>was executed again, forged ARP replies were still visible in Wireshark, but neither the router nor the Windows client updated their ARP tables. The gateway MAC address on Windows remained unchanged, confirming that ARP spoofing attempts were rejected and MITM was prevented.</p><figure id="2f93c2ec-6456-8067-9e69-ca80196cc6a8" class="image" data-notion-image="windows_defense.png" dir="ltr"><a href="windows_defense.png"><img style="width:709.984375px" src="windows_defense.png"/></a></figure><p id="2f93c2ec-6456-80ff-92fa-efd09062d7cb" class="" dir="auto">
+</p><figure id="2f93c2ec-6456-802c-ab76-e88c715bea7c" class="image" data-notion-image="during_defence.png" dir="ltr"><a href="during_defence.png"><img style="width:709.96875px" src="during_defence.png"/></a></figure><p id="2f93c2ec-6456-80ff-b74d-c182c38d9fa9" class="" dir="auto">
+</p><p id="2f93c2ec-6456-804c-a3e8-c271b1523107" class="" dir="auto">IP–MAC binding is effective in small lab environments, but enterprise networks typically rely on switch-level protections such as Dynamic ARP Inspection and DHCP snooping for stronger enforcement.</p><p id="2f93c2ec-6456-80d3-8f7e-d1210b99c45a" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8032-bd7e-e5a9ef684b19" class="" dir="auto"><strong>2. Defense Against Rogue DHCP Server Attack </strong></p><p id="2f93c2ec-6456-80af-920e-eac21af4bea7" class="" dir="auto">Attack: Rogue DHCP offer (Exercise 6)</p><p id="2f93c2ec-6456-804f-b3a1-c1910c1d94b2" class="" dir="auto">Attacker tool: Yersinia (Kali Linux)</p><p id="2f93c2ec-6456-8039-be4b-c3bf39d476f3" class="" dir="auto"><strong>Before Defense Rogue DHCP server attack </strong></p><p id="2f93c2ec-6456-8089-b0cc-c84e8bac1085" class="" dir="auto">With the router DHCP service and DHCP snooping temporarily disabled, a rogue DHCP server launched using Yersinia assigned the attacker as the DHCP server and default gateway for the Windows client. </p><p id="2f93c2ec-6456-8080-9fd3-d681687f59bb" class="" dir="auto">before  attack </p><figure id="2f93c2ec-6456-805a-92ed-f73f67a6a8e5" class="image" data-notion-image="image.png" dir="ltr"><a href="image.png"><img style="width:710px" src="image.png"/></a></figure><p id="2f93c2ec-6456-80d1-a9d5-d6ea738465c8" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8074-b9ed-f1740e93aacc" class="" dir="auto">during  attack </p><figure id="2f93c2ec-6456-8036-9b59-e592d9cd497e" class="image" data-notion-image="kaliduringattack%201.png" dir="ltr"><a href="kaliduringattack%201.png"><img style="width:709.984375px" src="kaliduringattack%201.png"/></a></figure><p id="2f93c2ec-6456-805b-843a-c028be774919" class="" dir="auto">
+</p><figure id="2f93c2ec-6456-809a-8717-df43690cb8be" class="image" data-notion-image="yersiniaserver%201.png" dir="ltr"><a href="yersiniaserver%201.png"><img style="width:709.96875px" src="yersiniaserver%201.png"/></a></figure><p id="2f93c2ec-6456-80fa-83bb-fe35b1154296" class="" dir="auto">
+</p><p id="2f93c2ec-6456-806c-9696-f12ebacacea7" class="" dir="auto">after  attack</p><figure id="2f93c2ec-6456-802e-b504-d99e4737b1a2" class="image" data-notion-image="windowsip_after%201.png" dir="ltr"><a href="windowsip_after%201.png"><img style="width:709.984375px" src="windowsip_after%201.png"/></a></figure><p id="2f93c2ec-6456-800a-97de-ed5be372babf" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8060-b211-db962f654c3b" class="" dir="auto"><strong>Mitigation: Endpoint-Level DHCP Filtering (Windows Firewall)</strong></p><p id="2f93c2ec-6456-8077-aeed-f30917445433" class="" dir="auto">Windows normally accepts DHCP responses from any server on the local network. To prevent acceptance of rogue DHCP offers, a Windows Defender Firewall rule was configured to block DHCP traffic originating from the attacker.</p><p id="2f93c2ec-6456-80ca-924b-c9be0f49060c" class="" dir="auto">Configuration (Inbound rule):</p><ul id="2f93c2ec-6456-80f6-add5-e2a2e62b31e9" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Protocol: UDP</li></ul><ul id="2f93c2ec-6456-80b7-bc7b-ed00e35a0f10" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Local port: 68</li></ul><ul id="2f93c2ec-6456-80e2-a152-e7ce8ea11073" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Remote port: 67</li></ul><ul id="2f93c2ec-6456-8093-b681-e26bed6fa5fb" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Remote IP address: Kali attacker IP</li></ul><ul id="2f93c2ec-6456-8009-bec5-e68ba75296a3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Action: Block the connection</li></ul><figure id="2f93c2ec-6456-8095-9425-c1f1e30a8636" class="image" data-notion-image="Screenshot_(79).png" dir="ltr"><a href="Screenshot_(79).png"><img style="width:709.96875px" src="Screenshot_(79).png"/></a></figure><p id="2f93c2ec-6456-807d-b845-e49c38bae98a" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80a2-abe5-ead97728fa53" class="" dir="auto">
+</p><p id="2f93c2ec-6456-800a-9245-c92d3bee4c33" class="" dir="auto"><strong>After Defense Rogue DHCP Server Attack </strong></p><p id="2f93c2ec-6456-8087-be59-f666bf486883" class="" dir="auto">After enabling the firewall rule and re-enabling the router’s DHCP service, the Windows client accepted a DHCP lease from the legitimate router.</p><p id="2f93c2ec-6456-80ac-a9bc-ed81859c8d6d" class="" dir="auto">
+</p><figure id="2f93c2ec-6456-8016-92a6-d1373dd2d545" class="image" data-notion-image="windows_rogue_after.png" dir="ltr"><a href="windows_rogue_after.png"><img style="width:709.984375px" src="windows_rogue_after.png"/></a></figure><p id="2f93c2ec-6456-8027-9ae3-f688501a39c1" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8029-a932-e2e39e968a00" class="" dir="auto">While endpoint firewall filtering successfully blocked rogue DHCP traffic in this lab, enterprise environments typically mitigate rogue DHCP using switch-level DHCP snooping and trusted port enforcement.</p><p id="2f93c2ec-6456-8046-a3e4-c27dda6b79ee" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80ad-a74c-e197986b3462" class="" dir="auto"><strong>3. Defense Against DHCP Starvation</strong></p><p id="2f93c2ec-6456-8007-95e1-c711c323f0d4" class="" dir="auto">Attack: DHCP starvation (exercise 5 )</p><p id="2f93c2ec-6456-80d5-81d7-da4ce04cc50b" class="" dir="auto">Attacker tool: Yersinia (Kali Linux)</p><p id="2f93c2ec-6456-80ef-aa15-d9bc4a016955" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8055-8e09-ef7be5d7a3a2" class="" dir="auto"><strong>Before Defense DHCP Starvation Attack</strong></p><p id="2f93c2ec-6456-80a9-957f-d69c7542af27" class="" dir="auto">The attacker launched a DHCP starvation attack by sending a large number of DHCP requests with spoofed MAC addresses. This exhausted the router’s DHCP address pool and prevented the Windows client from obtaining a valid lease.</p><p id="2f93c2ec-6456-806e-8960-c8f70edc89fe" class="" dir="auto">
+</p><figure id="2f93c2ec-6456-80dd-a4e3-ca6ce7e5fd19" class="image" data-notion-image="windows_duringeth0%201.png" dir="ltr"><a href="windows_duringeth0%201.png"><img style="width:709.984375px" src="windows_duringeth0%201.png"/></a></figure><p id="2f93c2ec-6456-80a1-b4fa-fd1c91098549" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8079-8e82-c7d24028283e" class="" dir="auto">
+</p><p id="2f93c2ec-6456-80b4-b3ca-ebe1ff973bac" class="" dir="auto"><strong>Mitigation</strong></p><p id="2f93c2ec-6456-80ab-b01e-ea969126f09e" class="" dir="auto">To protect against DHCP pool exhaustion, the Windows client was configured with a static IP address outside the DHCP range. By bypassing DHCP entirely, the client no longer depended on the router’s address pool. This mitigation protects the individual host but does not prevent DHCP starvation at the network level.</p><figure id="2f93c2ec-6456-808a-b966-fc12ec58b481" class="image" data-notion-image="Static_IP.png" dir="ltr"><a href="Static_IP.png"><img style="width:709.984375px" src="Static_IP.png"/></a></figure><p id="2f93c2ec-6456-80d0-8458-ef11f936b549" class="" dir="auto">
+</p><p id="2f93c2ec-6456-803a-9f71-eaae2714b70f" class="" dir="auto">
+</p><p id="2f93c2ec-6456-8041-b9d8-e6fdfc207449" class="" dir="auto"><strong>After Defense DHCP Starvation Attack</strong></p><p id="2f93c2ec-6456-80b1-880e-e6882a74f82d" class="" dir="auto">While the DHCP starvation attack continued to run, the Windows client retained its static IP configuration and maintained normal network connectivity. Because the client no longer relied on DHCP, exhaustion of the DHCP pool had no impact on its operation.</p><p id="2f93c2ec-6456-80b2-aba0-e86b08081188" class="" dir="auto">
+</p><figure id="2f93c2ec-6456-80ba-aa53-cee9e8c6b58b" class="image" data-notion-image="ipstatic_starvation.png" dir="ltr"><a href="ipstatic_starvation.png"><img style="width:709.984375px" src="ipstatic_starvation.png"/></a></figure><p id="2f93c2ec-6456-8045-b46d-ffd790ca8fd9" class="" dir="auto">
+</p><p id="2f93c2ec-6456-806d-8fd6-fbdec38a6673" class="" dir="auto">A static client IP preserves availability in a lab setting but does not eliminate DHCP starvation globally. Enterprise mitigation typically involves switch-level rate limiting, port security, and DHCP snooping.</p><p id="2fa3c2ec-6456-8030-97f0-f5f164072d87" class="" dir="auto"><strong>4. Defense Against Evil Twin Attack</strong></p><p id="2fa3c2ec-6456-80d4-9b88-d875f3b80951" class="" dir="auto">Attack: Evil Twin wireless MITM (exercise 7 ) </p><p id="2fa3c2ec-6456-80e0-946a-ed4f00f8550a" class="" dir="auto">Attacker tool: wifiphisher</p><p id="2fa3c2ec-6456-8044-9004-e99d860a728b" class="" dir="auto"><strong>Before Defense Evil Twin Attack</strong></p><p id="2fa3c2ec-6456-800f-9490-d74c151b45e8" class="" dir="auto">I have used <strong>wifiphisher</strong> to clone the legitimate wireless network and broadcast a rogue access point with the same SSID.</p><pre id="2fa3c2ec-6456-801f-8ee7-ce377b2f1480" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">sudo wifiphisher</code></pre><p id="2fa3c2ec-6456-809e-8f12-eaac16cf36bf" class="" dir="auto">A rogue access point created with wifiphisher mimicked the trusted SSID, causing the victim device to see it as legitimate and risk connecting, which could allow traffic interception and phishing.</p><p id="2fa3c2ec-6456-809f-a62a-f99a17efe2fb" class="" dir="auto">This demonstrates how attackers can impersonate trusted wireless infrastructure.</p><p id="2fa3c2ec-6456-8042-a53c-fab2d9d87fb6" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-8037-8a76-c24533212d5c" class="" dir="auto">during Evil Twin Attack</p><figure id="2fa3c2ec-6456-80f4-b597-fa271b6d97b3" class="image" data-notion-image="windows_eviltwin%201.png" dir="ltr"><a href="windows_eviltwin%201.png"><img style="width:709.984375px" src="windows_eviltwin%201.png"/></a></figure><p id="2fa3c2ec-6456-80d9-ac37-d61c4a9a9af5" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-80a4-9cd3-efb7559b0cd2" class="" dir="auto"><strong>Mitigation</strong></p><p id="2fa3c2ec-6456-80f7-832a-cad511dca7c0" class="" dir="auto">The Windows client was configured to connect only to trusted encrypted networks and to avoid automatic association with unknown Wi-Fi access points. Rogue SSIDs cannot be prevented from appearing, but controlling client trust prevents automatic compromise.</p><p id="2fa3c2ec-6456-80be-8f5f-c42b0816c6d7" class="" dir="auto"><strong>After Defense</strong></p><p id="2fa3c2ec-6456-80f4-abd4-efc7109c96b5" class="" dir="auto">During the active Evil Twin attack, duplicate SSIDs remained visible, but the client did not automatically connect to the rogue access point. Because auto-connect was disabled, joining a network required explicit user selection, reducing the risk of blind connection to the attacker-controlled access point.</p><figure id="2fa3c2ec-6456-804e-aacc-e756e2625d43" class="image" data-notion-image="afterdefense_wifi.png" dir="ltr"><a href="afterdefense_wifi.png"><img style="width:709.96875px" src="afterdefense_wifi.png"/></a></figure><p id="2fa3c2ec-6456-809f-a220-d1bc2b929c5c" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-805b-b508-d7ef711a9557" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-80f1-a26f-fdca3765b6c3" class="" dir="auto"><strong>5. HTTPS Encryption and Protocol Hardening</strong></p><p id="2fa3c2ec-6456-80eb-b870-f723dbfded60" class="" dir="auto">Defense goal: Protect application traffic from MITM interception</p><p id="2fa3c2ec-6456-8093-872b-ff57f4b4f6c4" class="" dir="auto"><strong>Before Defense </strong></p><p id="2fa3c2ec-6456-8055-90dd-cbe318492379" class="" dir="auto">During earlier MITM tests, intercepted HTTP traffic appeared in readable plaintext in Wireshark. This shows that unencrypted communication can be observed and analyzed by an attacker positioned in the network.</p><figure id="2fa3c2ec-6456-803f-8d61-f9bbb968a672" class="image" data-notion-image="image%201.png" dir="ltr"><a href="image%201.png"><img style="width:709.984375px" src="image%201.png"/></a></figure><p id="2fa3c2ec-6456-8013-a96d-fe620c3218ee" class="" dir="auto">ex 4 visible password during MITM attack </p><p id="2fa3c2ec-6456-80a9-9336-c8d6d1cc1566" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-80b8-a5fb-ebf83aace5dd" class="" dir="auto"><strong>Mitigation</strong></p><p id="2fa3c2ec-6456-80ea-9628-c3f2515c4da2" class="" dir="auto">Application-layer encryption was implemented by installing Nginx and configuring it with a TLS 1.3 certificate. All traffic between the client and server was forced through HTTPS.</p><p id="2fa3c2ec-6456-802f-97ca-db5520758fe7" class="" dir="auto">Protocol hardening was added by enabling the <strong>Strict-Transport-Security (HSTS)</strong> header in the Nginx configuration. This prevents attackers from downgrading the connection to insecure HTTP.</p><p id="2fa3c2ec-6456-8057-9ac8-daf85f80069c" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-80b0-b5eb-efef84123fd5" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Generate a Certificate: </mark><div class="indented"><p id="2fa3c2ec-6456-8014-808d-cf5a551cca8a" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default"><code>sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt</code></mark></p><p id="2fa3c2ec-6456-8064-bc73-f7e514f3e93f" class="" dir="auto">
+</p></div></p><p id="2fa3c2ec-6456-8068-bb3a-e3fb92a89ff3" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Configure Nginx with HSTS:</mark></p><p id="2fa3c2ec-6456-80e7-8ba4-ec206e4f3be1" class="" dir="auto"><div class="indented"><p id="2fa3c2ec-6456-8038-b2ab-cbeba7de277b" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default"><code>server {<br/>    listen 443 ssl;<br/>    server_name &lt;KALI_IP&gt;;<br/><br/>    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;<br/>    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;<br/><br/>    # The HSTS Header<br/>    add_header Strict-Transport-Security &quot;max-age=31536000; includeSubDomains&quot; always;<br/><br/>    location / {<br/>        root /var/www/html;<br/>        index index.html;<br/>    }<br/>}</code></mark></p></div></p><p id="2fa3c2ec-6456-8054-85ff-e9746ad22ba4" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Restart Nginx: </mark><mark class="highlight-default" data-notion-highlight="default"><code>sudo systemctl restart nginx</code></mark></p><p id="2fa3c2ec-6456-80b6-8e1e-f1c2ac53d2e6" class="" dir="auto">
+</p><figure id="2fa3c2ec-6456-8052-9bf0-f20865567ae0" class="image" data-notion-image="CERTIFICATE.png" dir="ltr"><a href="CERTIFICATE.png"><img style="width:709.984375px" src="CERTIFICATE.png"/></a></figure><p id="2fa3c2ec-6456-800e-8b7b-df642d53a28b" class="" dir="auto">
+</p><p id="2fa3c2ec-6456-80b1-8d28-ee758ba54851" class="" dir="auto"><strong>After Defense</strong></p><p id="2fb3c2ec-6456-8002-ba97-d647311f6ba2" class="" dir="auto"><span style="border-bottom:0.05em solid">Enforced Security: </span>Configured HTTPS (TLS 1.3) and the HSTS header in Nginx. This successfully blocked &quot;SSL Stripping&quot; by forcing the browser to reject all insecure HTTP connections.</p><p id="2fb3c2ec-6456-80b9-a6d1-d58a30703d02" class="" dir="auto"><span style="border-bottom:0.05em solid">Traffic Privacy:</span> Wireshark captures verified that all data is now encrypted &quot;Application Data,&quot; leaving no plaintext visible to an interceptor.</p><p id="2fb3c2ec-6456-80ac-b9b4-d8616713e90f" class="" dir="auto"><span style="border-bottom:0.05em solid">Protocol Verification: </span>Confirmed the active <mark class="highlight-default" data-notion-highlight="default"><code>Strict-Transport-Security</code></mark><mark class="highlight-default" data-notion-highlight="default"> </mark>policy via the browser’s Developer Tools (Network tab), ensuring permanent protection.</p><p id="2fb3c2ec-6456-804e-95e4-deb973e9aaeb" class="" dir="auto">
+</p><figure id="2fb3c2ec-6456-801d-be41-c81072405231" class="image" data-notion-image="wireshark_tls.png" dir="ltr"><a href="wireshark_tls.png"><img style="width:709.984375px" src="wireshark_tls.png"/></a></figure><p id="2fb3c2ec-6456-803f-9019-cf292bab2233" class="" dir="auto">wireshark capture traffic</p><p id="2fb3c2ec-6456-8002-82bb-eb6d57d28a80" class="" dir="auto">
+</p><figure id="2fb3c2ec-6456-8024-8e07-e3864f7339c0" class="image" data-notion-image="certificate_again.png" dir="ltr"><a href="certificate_again.png"><img style="width:710px" src="certificate_again.png"/></a></figure><p id="3003c2ec-6456-80b0-aa4c-c042fc93ccfb" class="" dir="auto">
+</p><p id="2fb3c2ec-6456-8042-9d36-eff05d245fef" class="" dir="auto">
+</p><figure id="3003c2ec-6456-80c9-9de0-dea4bd1e9fe3" class="image" data-notion-image="windows_server.png" dir="ltr"><a href="windows_server.png"><img style="width:790.484375px" src="windows_server.png"/></a></figure><p id="3003c2ec-6456-80a6-a10a-df2b9071341c" class="" dir="auto">Strict Transport Security policy</p><p id="3003c2ec-6456-8092-9fca-ccab1ed22f64" class="" dir="auto">
+</p><p id="2fb3c2ec-6456-8020-938a-c94e463914ca" class="" dir="auto">Exercise 8 demonstrated layered defences against Man-in-the-Middle attacks at multiple levels of the network stack.</p><p id="2fb3c2ec-6456-8051-becb-cd0e36e47821" class="" dir="auto">ARP spoofing and rogue DHCP attacks were mitigated through endpoint configuration and network trust control. Wireless Evil Twin attacks were reduced by enforcing encrypted Wi-Fi connections and disabling automatic association with unknown access points. At the application layer, HTTPS encryption and HSTS ensured that intercepted traffic remained unreadable and resistant to downgrade attacks.</p><p id="2fb3c2ec-6456-80d7-9151-cb012853fef7" class="" dir="auto">Together, these measures show that effective MITM defense does not rely on a single control, but on layered protection combining network hardening, encrypted communication, and controlled client trust.</p><h3 id="3003c2ec-6456-800d-b326-fb9b5fb5dbf9" class="" dir="auto">Exercise 9 – Using MITM Attack Detection Tools</h3><p id="3003c2ec-6456-80b1-bcd8-dd050c05fc92" class="" dir="auto">Install and configure specialized tools to detect MITM attacks in a test network. Monitor activity and react to any attack attempt.</p><p id="3003c2ec-6456-808d-b115-cab4f5d2ad81" class="" dir="auto">In this exercise, I configured detection tools to identify the MITM attacks previously performed in my test network, including ARP spoofing, DHCP starvation and rogue DHCP server behavior. The Windows victim machine was set up to monitor network activity in real time and generate alerts when these attack patterns appeared.</p><p id="3003c2ec-6456-8015-b609-eaa4cc1432da" class="" dir="auto">Monitoring focused on analyzing IDS alerts and logs generated during the attack rather than manual packet inspection.</p><p id="3003c2ec-6456-80c5-a2bc-c4dba660082b" class="" dir="auto"><strong>ARP spoofing detection</strong></p><p id="3003c2ec-6456-809a-973a-f1ddf4d8e832" class="" dir="auto">For ARP spoofing detection, the XArp monitoring tool was used. XArp identified MAC/IP inconsistencies and generated warnings indicating active ARP attacks. The alerts were verified and captured as proof.</p><figure id="3003c2ec-6456-8042-897f-ee99aa8dcfa7" class="image" data-notion-image="xrp2.png" dir="ltr"><a href="xrp2.png"><img style="width:710px" src="xrp2.png"/></a></figure><p id="3003c2ec-6456-8039-b98a-fc7bc730328a" class="" dir="auto">
+</p><p id="3003c2ec-6456-80df-ad56-d7177e6941a7" class="" dir="auto"><strong>DHCP-based attack detection</strong></p><p id="3003c2ec-6456-80a6-9c6d-df89c2776f8f" class="" dir="auto">Snort IDS was configured on Windows laptop target victim, to detect DHCP-based attacks. It ran as a background service and logged alerts to:</p><pre id="3003c2ec-6456-800e-95ee-d5c246b5f973" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">C:\Snort\log\alert.ids</code></pre><figure id="3003c2ec-6456-8076-9d02-d7477cecdc8d" class="image" data-notion-image="snort.png" dir="ltr"><a href="snort.png"><img style="width:710px" src="snort.png"/></a></figure><p id="3003c2ec-6456-8067-950f-ce2516a24801" class="" dir="auto">
+</p><p id="3003c2ec-6456-80ce-bff3-edf46f26ecba" class="" dir="auto">A PowerShell monitoring script was created to generate Windows popup alerts whenever Snort detected suspicious traffic.</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js" integrity="sha512-m3JYEI6gx5fh9jF10FjGoMzVKcV2N6nchcDcqPCdI1L3R2WQV7br2XVNR8iTLb2daOMRl3zldbcfT40xU2ntVw==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><pre id="3003c2ec-6456-8088-b009-ed41fe4e11ea" class="code code-wrap" data-notion-code-syntax="jsx"><code class="language-jsx" style="white-space:pre-wrap;word-break:break-all"># C:\Snort\alert_popup.ps1
+# Watches Snort alert file and shows a Windows popup you can screenshot.
+# Mode: MessageBox (blocks until you click OK)
+
+$path = &quot;C:\Snort\log\alert.ids&quot;
+
+# Ensure the file exists
+if (-not (Test-Path $path)) {
+    New-Item -Path $path -ItemType File -Force | Out-Null
+}
+
+# Needed for MessageBox
+Add-Type -AssemblyName PresentationFramework
+
+function Show-Popup([string]$msg) {
+    $safe = ($msg -replace &#x27;\s+&#x27;, &#x27; &#x27;).Trim()
+    if ($safe.Length -gt 800) { $safe = $safe.Substring(0, 800) + &quot;...&quot; }
+
+    # Blocking popup (easy to screenshot)
+    [System.Windows.MessageBox]::Show($safe, &quot;Snort Alert&quot;) | Out-Null
+}
+
+# Start tailing from end of file (so you only get NEW alerts)
+$lastLen = (Get-Item $path).Length
+
+while ($true) {
+    Start-Sleep -Milliseconds 400
+
+    $item = Get-Item $path
+
+    # Handle truncation / rotation
+    if ($item.Length -lt $lastLen) { $lastLen = 0 }
+
+    # If file grew, read only new bytes
+    if ($item.Length -gt $lastLen) {
+        $fs = [System.IO.File]::Open($path, &#x27;Open&#x27;, &#x27;Read&#x27;, &#x27;ReadWrite&#x27;)
+        $fs.Seek($lastLen, [System.IO.SeekOrigin]::Begin) | Out-Null
+        $sr = New-Object System.IO.StreamReader($fs)
+        $newText = $sr.ReadToEnd()
+        $sr.Close(); $fs.Close()
+
+        $lastLen = $item.Length
+
+        foreach ($line in ($newText -split &quot;`r?`n&quot;)) {
+            $l = $line.Trim()
+            if ($l) {
+                Show-Popup (&quot;Snort: &quot; + $l)
+            }
+        }
+    }
+}
+</code></pre><figure id="3003c2ec-6456-803b-abdb-cf79ed66c507" dir="ltr"><div class="source"><a href="alert_popup.ps1" data-notion-file="alert_popup.ps1" data-notion-file-alias="alert_popup.ps1">alert_popup.ps1</a></div></figure><p id="3003c2ec-6456-80f2-b483-ceacfd8160f5" class="" dir="auto">
+</p><p id="3003c2ec-6456-803b-a3d1-e39cd4bd8399" class="" dir="auto">During the attack simulation, Snort successfully detected:</p><ul id="3003c2ec-6456-8052-86b0-f25684bfac1e" class="bulleted-list" dir="auto"><li style="list-style-type:disc">DHCP starvation/flood activity</li></ul><ul id="3003c2ec-6456-8001-85cd-fab25f991ce1" class="bulleted-list" dir="auto"><li style="list-style-type:disc">rogue DHCP offers</li></ul><p id="3003c2ec-6456-80dc-86d1-e98569a63776" class="" dir="auto">These alerts confirmed abnormal network behavior and were documented as evidence.</p><figure id="3003c2ec-6456-805b-a349-e13eb497fc68" class="image" data-notion-image="alert1.png" dir="ltr"><a href="alert1.png"><img style="width:662px" src="alert1.png"/></a></figure><p id="3003c2ec-6456-80e1-ae12-cbe92f93db1d" class="" dir="auto">
+</p><figure id="3003c2ec-6456-801c-a614-c24f767df38f" class="image" data-notion-image="alert_rogue.png" dir="ltr"><a href="alert_rogue.png"><img style="width:548px" src="alert_rogue.png"/></a></figure><p id="3003c2ec-6456-800f-a16e-c7fc276ed2c0" class="" dir="auto">
+</p><figure id="3003c2ec-6456-8006-8f13-e96c814d28e1" class="image" data-notion-image="snort_logs.png" dir="ltr"><a href="snort_logs.png"><img style="width:710px" src="snort_logs.png"/></a></figure><p id="3003c2ec-6456-8036-921b-dc0295b76065" class="" dir="auto">logs in snort </p><p id="3033c2ec-6456-8058-8dbf-f83305f867a1" class="" dir="auto">
+</p><p id="3033c2ec-6456-80c7-9407-efaf2bcb24ad" class="" dir="auto"><strong>Reaction</strong></p><p id="3033c2ec-6456-8002-924b-f1ee76178d94" class="" dir="auto">After each alert, I checked the IDS logs and monitoring output to confirm the detection. I documented the evidence and stopped the attacker machine. This showed that MITM activity could be identified and responded to in real time.</p><p id="3033c2ec-6456-80d7-b95e-d4a42d0724a1" class="" dir="auto"><strong>Wi-Fi Phishing / Evil Twin – Prevention and Real-World Protection</strong></p><p id="3033c2ec-6456-80f8-9b26-ebfcc786b6ca" class="" dir="auto">Full wireless detection was not implemented in this lab, but Wi-Fi phishing risks can be reduced by disabling automatic connections, checking network names carefully, and using encrypted communication such as HTTPS or a VPN. A VPN protects traffic even when connected to an untrusted network.</p><p id="3033c2ec-6456-8072-9f64-c14a878e330b" class="" dir="auto">In real enterprise networks, organizations use wireless intrusion detection systems (WIDS/WIPS), centralized access point control, and certificate-based authentication (WPA2/WPA3 Enterprise) to detect and block rogue access points automatically.</p><p id="3033c2ec-6456-809a-909e-f44e6abeec10" class="" dir="auto">ARP spoofing in real environments is detected by monitoring unusual IP-to-MAC changes. Enterprise switches use Dynamic ARP Inspection and IDS tools to block or alert on suspicious ARP activity.</p><p id="3033c2ec-6456-804e-b271-ef6bad6b86b7" class="" dir="auto">DHCP attacks are detected by identifying abnormal request floods or unauthorized DHCP offers. DHCP snooping ensures that only trusted DHCP servers can assign addresses.</p><p id="3033c2ec-6456-8011-9c95-e294c2f2b3e6" class="" dir="auto">Professional detection tools include Snort, Suricata, Zeek, and enterprise wireless monitoring systems. These tools provide advanced traffic analysis and automated alerts in large networks.</p><p id="3033c2ec-6456-807b-9191-f6979642fd18" class="" dir="auto"><strong>Conclusion</strong></p><p id="3033c2ec-6456-8017-9e38-c2e93aa1f14e" class="" dir="auto">This exercise showed that IDS tools can detect MITM attacks in real time. Monitoring alerts and analyzing logs allows quick identification and response, which is important for reducing the impact of network attacks.</p><h3 id="3003c2ec-6456-8080-b41c-e722048d0257" class="" dir="auto">Exercise 10 - Testing the robustness of the implemented security measures:</h3><p id="3003c2ec-6456-8084-873c-fe3e05382ac9" class="" dir="auto">Perform <strong>penetration tests</strong> on your test network to evaluate the effectiveness of the protection measures against <strong>MITM (Man-in-the-Middle) attacks</strong>. Identify potential weaknesses and continuously improve the security of your system.</p><p id="3003c2ec-6456-8043-a569-d8e538d22621" class="" dir="auto"><strong>Objective</strong></p><p id="3003c2ec-6456-8094-9720-e45b3b5f06b6" class="" dir="auto">The purpose of this exercise was to test whether the security measures implemented in Exercise 8 were effective against MITM attacks through controlled penetration testing.</p><p id="3003c2ec-6456-8020-ac44-fa32658e2f6a" class="" dir="auto"><strong>Testing Results</strong></p><p id="3003c2ec-6456-80ae-ab78-e627822be39c" class="" dir="auto">I executed multiple MITM attack techniques  in the test network, including DHCP starvation, rogue DHCP server behavior and ARP spoofing.</p><p id="3003c2ec-6456-80de-b947-e04ceaa9a1d9" class="" dir="auto">During the DHCP starvation attack, Snort IDS detected abnormal broadcast DHCP traffic and generated a real-time alert:</p><pre id="3003c2ec-6456-80eb-9d0a-cf4c2bb22fa6" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">DHCP STARVATION/FLOOD DETECTED</code></pre><p id="3003c2ec-6456-80a4-a7ad-fcda7b1e917a" class="" dir="auto">This alert corresponds to repeated DHCP requests:</p><pre id="3003c2ec-6456-803d-86ca-f66d53b3a06b" class="code code-wrap"><code style="white-space:pre-wrap;word-break:break-all">0.0.0.0:68 → 255.255.255.255:67</code></pre><p id="3003c2ec-6456-80b2-b789-d892b5fa4808" class="" dir="auto">which is characteristic of DHCP exhaustion attacks. The popup alert and packet capture confirm that the IDS successfully identified malicious behavior during live penetration testing.</p><p id="3003c2ec-6456-807e-b0e2-e42388b19574" class="" dir="auto">
+</p><figure id="3003c2ec-6456-806d-a196-f10cdf9a0fc4" class="image" data-notion-image="Screenshot_(114).png" dir="ltr"><a href="Screenshot_(114).png"><img style="width:709.984375px" src="Screenshot_(114).png"/></a></figure><p id="3003c2ec-6456-80ec-a71d-e9d3362f7f2e" class="" dir="auto">
+</p><p id="3003c2ec-6456-80e3-a1a5-fe074b346072" class="" dir="auto">In addition, HTTPS protection prevented interception of encrypted web traffic, confirming that transport-layer encryption mitigates credential theft even during MITM attempts.</p><p id="3003c2ec-6456-8024-a45a-d6942e550b17" class="" dir="auto">This shows that while MITM traffic can still occur at the network layer, encryption prevents attackers from reading sensitive data.</p><p id="3003c2ec-6456-80a4-9ad2-f922785e4476" class="" dir="auto"><strong>Observed Weaknesses</strong></p><p id="3003c2ec-6456-803e-b7fa-d02138621228" class="" dir="auto">Penetration testing revealed that:</p><ul id="3003c2ec-6456-8046-a962-d13033a9a418" class="bulleted-list" dir="auto"><li style="list-style-type:disc">attacks can still reach the network layer</li></ul><ul id="3003c2ec-6456-8090-b39a-f2c52b684e70" class="bulleted-list" dir="auto"><li style="list-style-type:disc">detection is effective but blocking is manual</li></ul><ul id="3003c2ec-6456-80ae-93e5-d3d06fe0f8b1" class="bulleted-list" dir="auto"><li style="list-style-type:disc">legacy protocols without encryption remain vulnerable</li></ul><ul id="3003c2ec-6456-80e1-acc3-cf0d5718ffc5" class="bulleted-list" dir="auto"><li style="list-style-type:disc">DHCP and ARP trust mechanisms are inherently weak</li></ul><p id="3003c2ec-6456-807c-a2d6-df45d533af9e" class="" dir="auto">These weaknesses exist at the protocol design level rather than configuration errors.</p><p id="3003c2ec-6456-8042-9e90-d8057b968178" class="" dir="auto"><strong>Evaluation</strong></p><p id="3003c2ec-6456-80b7-b5ff-d103518d2b8d" class="" dir="auto">The security measures implemented earlier reduced the impact of MITM attacks but did not eliminate them entirely. Encryption protects data confidentiality, while IDS provides visibility and detection.</p><p id="3003c2ec-6456-8029-a4b0-d6745a7bb5a5" class="" dir="auto">This layered defense approach improves resilience but requires continued monitoring and administrative response.</p><p id="3003c2ec-6456-8004-83f7-d716db2a0303" class="" dir="auto"><strong>Conclusion</strong></p><p id="3003c2ec-6456-8097-8044-c1863ca6c81d" class="" dir="auto">The penetration tests confirm that the system is capable of detecting MITM attacks and protecting encrypted communications. However, complete prevention requires combining detection, encryption, and automated response mechanisms.</p><p id="3003c2ec-6456-80fe-8e8c-c9dc9e895049" class="" dir="auto">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

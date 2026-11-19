@@ -1,0 +1,824 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>WordPress Security Hardening </title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="3623c2ec-6456-803e-837c-f63c386eaec1" class="page sans"><header><h1 class="page-title" dir="auto">WordPress Security Hardening </h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/arrow-circle-down_gray.svg" style="width:14px;height:14px;display:block"/></span>Level of expertise</th><td><span class="selected-value select-value-color-brown">Application Security</span></td></tr></tbody></table></header><div class="page-body"><p id="3623c2ec-6456-8002-ab30-e1ce6868dde9" class="" dir="auto">In this lab, I will focus on securing a local WordPress website. I will implement key system security principles, as well as configure a WAF (Web Application Firewall).</p><h4 id="3623c2ec-6456-80dc-a588-f3106a119fce" class="" dir="auto">Exercise 1 - Updating the WordPress Platform</h4><p id="3623c2ec-6456-80fa-9f73-ca699d20b992" class="" dir="auto">Check if the installed WordPress version is updated to the latest release. Update the WordPress platform along with all installed plugins and themes. You can enable the auto-update feature in the Plugins section for each individual plugin.</p><p id="3623c2ec-6456-80dd-a344-ec2fce44c34a" class="" dir="auto"><strong>Before :</strong> I opened the update dashboard and identified that the WordPress core was up to date (version 6.9.4), but two plugins (<em>Akismet</em> and <em>Limit Login Attempts</em>) needed updates.</p><figure id="3623c2ec-6456-8049-9fe3-eabf370d4910" class="image" data-notion-image="updates.png" dir="ltr"><a href="updates.png"><img style="width:792px" src="updates.png"/></a></figure><p id="3623c2ec-6456-80d6-9474-e7ce2b30981f" class="" dir="auto">
+</p><p id="3623c2ec-6456-8062-9328-dd2d205ec1c2" class="" dir="auto"><strong>After:</strong> I ran the updates. The dashboard now confirms that the core, all plugins, and all themes are completely up to date.</p><figure id="3623c2ec-6456-8063-8350-f00f03cc6faa" class="image" data-notion-image="plugin2.png" dir="ltr"><a href="plugin2.png"><img style="width:792px" src="plugin2.png"/></a></figure><p id="3623c2ec-6456-80ea-b1b0-c13978ae6daf" class="" dir="auto">
+</p><figure id="3623c2ec-6456-80aa-b488-de57bcceebcb" class="image" data-notion-image="wordpress1.png" dir="ltr"><a href="wordpress1.png"><img style="width:792px" src="wordpress1.png"/></a></figure><p id="3623c2ec-6456-8092-841f-ccc7bb107836" class="" dir="auto">
+</p><h4 id="3623c2ec-6456-804f-af93-db6b882f4240" class="" dir="auto">Exercise 2 - Using Strong Passwords</h4><p id="3623c2ec-6456-80bc-bb57-d16763781c19" class="" dir="auto">Ensure that all user accounts on the WordPress site have strong passwords (minimum 12 characters), consisting of a combination of uppercase and lowercase letters, numbers, and special characters.</p><ul id="3633c2ec-6456-8091-be05-dfbd7d7ea515" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><strong>Password Generation:</strong> I used an online password generator (LastPass) to create a strong, complex 12-character password combining uppercase, lowercase, numbers, and symbols.</li></ul><figure id="3633c2ec-6456-8037-a7c9-c96146b830ed" class="image" data-notion-image="passwords.png" dir="ltr"><a href="passwords.png"><img style="width:792px" src="passwords.png"/></a></figure><ul id="3633c2ec-6456-808e-be10-d72570be78d3" class="bulleted-list" dir="auto"><li style="list-style-type:disc"><mark class="highlight-default" data-notion-highlight="default"><strong>Account Update:</strong></mark><mark class="highlight-default" data-notion-highlight="default"> I applied this new credential to the WordPress </mark><mark class="highlight-default" data-notion-highlight="default"><code>admin</code></mark><mark class="highlight-default" data-notion-highlight="default"> account via the user profile dashboard (</mark><mark class="highlight-default" data-notion-highlight="default"><code>/wp-admin/profile.php</code></mark><mark class="highlight-default" data-notion-highlight="default">), showing a successful &quot;Profile updated&quot; notification.</mark></li></ul><figure id="3633c2ec-6456-806c-b047-c6b7256d4104" class="image" data-notion-image="updatepass.png" dir="ltr"><a href="updatepass.png"><img style="width:792px" src="updatepass.png"/></a></figure><p id="3633c2ec-6456-804c-8315-d22a498b78b6" class="" dir="auto">
+</p><figure id="3633c2ec-6456-8090-82dc-d555eccb790d" class="image" data-notion-image="Screenshot_2026-05-16_16-29-03.png" dir="ltr"><a href="Screenshot_2026-05-16_16-29-03.png"><img style="width:643px" src="Screenshot_2026-05-16_16-29-03.png"/></a></figure><p id="3633c2ec-6456-80d9-bd61-f8936a2817bd" class="" dir="auto">
+</p><h4 id="3633c2ec-6456-8086-ab25-d304602db8d4" class="" dir="auto"><strong>Exercise 3: Limiting Authentication Attempts</strong></h4><p id="3633c2ec-6456-808e-b695-c0916179b90d" class="" dir="auto">Install a security plugin to limit the number of failed login attempts on the WordPress site. Configure the settings to temporarily block IP addresses that attempt to brute-force the authentication portal.</p><p id="3633c2ec-6456-807a-9a55-fdf38c03f96f" class="" dir="auto">I deployed the Wordfence security plugin to enforce rate limiting and temporarily block malicious IP addresses trying to force entry into the WordPress site.</p><figure id="3633c2ec-6456-8023-92f7-f9f4c54bf6f6" class="image" data-notion-image="6f5b7b47-4e84-4c8f-b452-0a3e010b18ec.png" dir="ltr"><a href="6f5b7b47-4e84-4c8f-b452-0a3e010b18ec.png"><img style="width:613.2003988035892px" src="6f5b7b47-4e84-4c8f-b452-0a3e010b18ec.png"/></a></figure><figure id="3633c2ec-6456-8087-9cd9-c7481367122f" class="image" data-notion-image="e833c8bf-cd38-4593-a82e-2bc491b7952e.png" dir="ltr"><a href="e833c8bf-cd38-4593-a82e-2bc491b7952e.png"><img style="width:604.7590953785643px" src="e833c8bf-cd38-4593-a82e-2bc491b7952e.png"/></a></figure><p id="3633c2ec-6456-8086-a214-c0ea86ccac55" class="" dir="auto">
+</p><hr id="3633c2ec-6456-80b4-9fce-cbf6979b71ba" dir="auto"/><p id="3633c2ec-6456-808e-8da0-f7ecb9ed39b0" class="" dir="auto">
+</p><h4 id="3633c2ec-6456-80d8-82c6-efc388430175" class="" dir="auto"><strong>Exercise 4: Implementing Multi-Factor Authentication</strong></h4><p id="3633c2ec-6456-80c0-a6ca-ebc0fff239f5" class="" dir="auto">Configure multi-factor authentication (MFA) for your WordPress administrator account. Use a multi-factor authentication plugin or service to add an extra layer of security.</p><p id="3633c2ec-6456-8027-9305-d118016cb845" class="" dir="auto">I used the Wordfence Login Security plugin to add a layer of Multi-Factor Authentication (MFA) to the administrator profile. The system generated a unique server-side QR code and a set of emergency recovery backup keys. I successfully verified the setup by entering the code and activating the policy, changing the account status to Active to block unauthorized access attempts.</p><figure id="3633c2ec-6456-8058-8518-f6fac3fd8b5a" class="image" data-notion-image="4f1450af-69e9-4282-8866-eaf881c6de6f.png" dir="ltr"><a href="4f1450af-69e9-4282-8866-eaf881c6de6f.png"><img style="width:593.6679536679536px" src="4f1450af-69e9-4282-8866-eaf881c6de6f.png"/></a></figure><p id="3633c2ec-6456-804f-a767-d323574cf751" class="" dir="auto">
+</p><figure id="3633c2ec-6456-80d7-b96b-c1f03499b8a3" class="image" data-notion-image="fe652892-db85-4f12-9428-01475b0201b3.png" dir="ltr"><a href="fe652892-db85-4f12-9428-01475b0201b3.png"><img style="width:606.5483234714004px" src="fe652892-db85-4f12-9428-01475b0201b3.png"/></a></figure><p id="3633c2ec-6456-80b9-994c-f3ec4c1a028e" class="" dir="auto">
+</p><p id="3633c2ec-6456-8034-b7c8-fb036b5c6ae6" class="" dir="auto">With MFA status verified as active on the server, the site will now demand a physical token validation for every login session. This effectively completely neutralizes any online dictionary or brute-force simulation.</p><figure id="3643c2ec-6456-80eb-924c-c8e81ffb0ed7" class="image" data-notion-image="Screenshot_2026-05-17_19-11-09.png" dir="ltr"><a href="Screenshot_2026-05-17_19-11-09.png"><img style="width:628px" src="Screenshot_2026-05-17_19-11-09.png"/></a></figure><h4 id="3633c2ec-6456-8070-a58d-d70502f8dcce" class="" dir="auto"><strong>Exercise 5: Securing the HTTPS Connection</strong></h4><p id="3633c2ec-6456-801f-880d-e392e4cf7180" class="" dir="auto">Install an SSL certificate and configure the WordPress site to use HTTPS connections. Ensure that all pages and forms are accessed over a secure connection.</p><p id="3633c2ec-6456-80e6-93fd-f1208ad3da8e" class="" dir="auto">I enabled HTTPS for my local WordPress site running in Docker by exposing port 443 and configuring Apache SSL inside the container. I enabled the SSL and rewrite modules in Apache and modified the .htaccess file to redirect all HTTP traffic to HTTPS. A self-signed TLS certificate was used because the site runs on localhost. Although Firefox shows a warning because the certificate is not issued by a trusted public Certificate Authority, the HTTPS connection is encrypted and working correctly.</p><p id="3633c2ec-6456-8016-8860-cd13ce185bf5" class="" dir="auto">I verified the HTTPS configuration by accessing the site through <a href="https://localhost/">https://localhost</a> and viewing the certificate information in Firefox Certificate Viewer.</p><figure id="3633c2ec-6456-80c5-a276-dc88393147b9" class="image" data-notion-image="access2.png" dir="ltr"><a href="access2.png"><img style="width:611.984375px" src="access2.png"/></a></figure><p id="3633c2ec-6456-80fc-b6e5-f75190c11e52" class="" dir="auto">
+</p><figure id="3633c2ec-6456-807a-aad9-d1915ff713b7" class="image" data-notion-image="certificate.png" dir="ltr"><a href="certificate.png"><img style="width:703.984375px" src="certificate.png"/></a></figure><figure id="3633c2ec-6456-8091-a0b5-cd9d1ffbaf59" class="image" data-notion-image="ssl.png" dir="ltr"><a href="ssl.png"><img style="width:703.96875px" src="ssl.png"/></a></figure><p id="3633c2ec-6456-80d2-8e9e-f2df2eb9e0f9" class="" dir="auto">
+</p><p id="3633c2ec-6456-8064-b3a4-dfddaa4b2f73" class="" dir="auto">I also tested the Really Simple Security plugin, but because the site runs on localhost with a self-signed certificate, automatic SSL detection and Let’s Encrypt configuration were not fully supported.</p><figure id="3633c2ec-6456-8039-8454-f15eb676185d" class="image" data-notion-image="pluginssl.png" dir="ltr"><a href="pluginssl.png"><img style="width:703.984375px" src="pluginssl.png"/></a></figure><figure id="3633c2ec-6456-8013-96b8-f7ea565438b4" class="image" data-notion-image="really.png" dir="ltr"><a href="really.png"><img style="width:703.984375px" src="really.png"/></a></figure><p id="3633c2ec-6456-8043-8725-d934d123b5ff" class="" dir="auto">
+</p><h4 id="3633c2ec-6456-8087-bb39-f90a8d8608d0" class="" dir="auto"><strong>Intermediate Level Exercises:</strong></h4><h4 id="3633c2ec-6456-80de-a01c-f3c7d0a39e85" class="" dir="auto"><strong>Exercise 6: Monitoring Authentication Activity</strong></h4><p id="3633c2ec-6456-801e-b307-fcc2c69397d8" class="" dir="auto">Install a security plugin to monitor login activity on the WordPress site. Track and analyze failed login attempts to detect potential unauthorized access attempts.</p><p id="3643c2ec-6456-8045-8444-d2d13078e429" class="" dir="auto">I have used WP Activity Log plugin to track login attempts.</p><figure id="3643c2ec-6456-809f-8332-d5f6cb7c476c" class="image" data-notion-image="4056f8c8-d3ca-4455-bad5-66308a6f5bef.png" dir="ltr"><a href="4056f8c8-d3ca-4455-bad5-66308a6f5bef.png"><img style="width:659.5033860045147px" src="4056f8c8-d3ca-4455-bad5-66308a6f5bef.png"/></a></figure><p id="3643c2ec-6456-80de-8838-e992e7d86ade" class="" dir="auto">
+</p><figure id="3643c2ec-6456-8056-b400-ff701b50b69c" class="image" data-notion-image="d33576f5-63f0-4fe5-a6a9-ee2872b220e4.png" dir="ltr"><a href="d33576f5-63f0-4fe5-a6a9-ee2872b220e4.png"><img style="width:661.7440543601359px" src="d33576f5-63f0-4fe5-a6a9-ee2872b220e4.png"/></a></figure><h4 id="3643c2ec-6456-809c-95d8-deacd4b21f4c" class="" dir="auto"><strong>Exercise 7: Configuring File and Directory Permissions</strong></h4><p id="3643c2ec-6456-80bd-b597-d9805f82496e" class="" dir="auto">Review and adjust the permissions of WordPress files and directories to ensure that only authorized users have access to sensitive files.</p><p id="3643c2ec-6456-80c8-b413-f545245c55e6" class="" dir="auto">Reviewing WordPress Security Configuration with Wordfence</p><figure id="3643c2ec-6456-805b-9bda-eefe49f88789" class="image" data-notion-image="wordfence_file.png" dir="ltr"><a href="wordfence_file.png"><img style="width:704px" src="wordfence_file.png"/></a></figure><p id="3643c2ec-6456-8071-9c92-ebfa4594af4d" class="" dir="auto">Reviewing WordPress File Permissions</p><figure id="3643c2ec-6456-8082-8d5c-c369be1955a1" class="image" data-notion-image="permisiuni.png" dir="ltr"><a href="permisiuni.png"><img style="width:704px" src="permisiuni.png"/></a></figure><p id="3643c2ec-6456-80f2-a586-c35c5fe634b1" class="" dir="auto">Adjusting Permissions for wp-config.php</p><figure id="3643c2ec-6456-8028-a278-ce16e627ab61" class="image" data-notion-image="permisni_schimbare.png" dir="ltr"><a href="permisni_schimbare.png"><img style="width:704px" src="permisni_schimbare.png"/></a></figure><p id="3643c2ec-6456-806b-900a-f35d6f15ac60" class="" dir="auto">Testing Unauthorized Access Restriction</p><figure id="3643c2ec-6456-8035-ab24-ce508be64a9d" class="image" data-notion-image="permision_denied.png" dir="ltr"><a href="permision_denied.png"><img style="width:549px" src="permision_denied.png"/></a></figure><p id="3643c2ec-6456-808c-a39f-d35d46642caa" class="" dir="auto">
+</p><h4 id="3643c2ec-6456-8068-acf0-f81694f48186" class="" dir="auto"><strong>Exercise 8: Implementing a Web Application Firewall (WAF)</strong></h4><p id="3643c2ec-6456-80b5-bbc6-d4589251af24" class="" dir="auto">Configure a web application firewall to protect the WordPress site against common attacks, such as SQL injections or cross-site scripting (XSS).</p><figure id="3643c2ec-6456-80f4-bb1c-fc2804dca131" class="image" data-notion-image="Screenshot_2026-05-01_09-53-42.png" dir="ltr"><a href="Screenshot_2026-05-01_09-53-42.png"><img style="width:704px" src="Screenshot_2026-05-01_09-53-42.png"/></a></figure><p id="3643c2ec-6456-8016-9a17-c96a906fc260" class="" dir="auto">
+</p><p id="3643c2ec-6456-8047-8b14-c8ce71fb6752" class="" dir="auto">Enabling Wordfence Firewall </p><figure id="3643c2ec-6456-8081-ba5e-cfce15915384" class="image" data-notion-image="Screenshot_2026-05-01_09-50-47.png" dir="ltr"><a href="Screenshot_2026-05-01_09-50-47.png"><img style="width:704px" src="Screenshot_2026-05-01_09-50-47.png"/></a></figure><figure id="3643c2ec-6456-809c-ba0e-e4e7625330b0" class="image" data-notion-image="Screenshot_2026-05-01_09-52-22.png" dir="ltr"><a href="Screenshot_2026-05-01_09-52-22.png"><img style="width:704px" src="Screenshot_2026-05-01_09-52-22.png"/></a></figure><figure id="3643c2ec-6456-8005-a0a7-d45d2c248d16" class="image" data-notion-image="Screenshot_2026-05-01_09-55-37.png" dir="ltr"><a href="Screenshot_2026-05-01_09-55-37.png"><img style="width:704px" src="Screenshot_2026-05-01_09-55-37.png"/></a></figure><p id="3643c2ec-6456-807f-b5c3-ddba132bc631" class="" dir="auto">
+</p><h4 id="3643c2ec-6456-80db-b8e8-e4cfc0fc2a25" class="" dir="auto"><strong>Exercise 9: Regular Backups</strong></h4><p id="3643c2ec-6456-80a5-9b16-ce7bee1ba671" class="" dir="auto">Establish a regular backup schedule for the WordPress site&#x27;s database and files. Ensure that you have the ability to quickly and efficiently restore the site in the event of a security incident.</p><p id="3643c2ec-6456-8030-8b5f-de0779e92ae1" class="" dir="auto">Configuring Backup Settings</p><p id="3643c2ec-6456-808f-9228-f9e986df8ee2" class="" dir="auto">The UpdraftPlus plugin was used to configure automatic backups for the WordPress website.</p><p id="3643c2ec-6456-809c-9e5f-d84080ece92c" class="" dir="auto">Backup schedules for:</p><ul id="3643c2ec-6456-8050-8976-c6f307ea39e5" class="bulleted-list" dir="auto"><li style="list-style-type:disc">website files;</li></ul><ul id="3643c2ec-6456-80f8-bc6c-ce8e0daed48a" class="bulleted-list" dir="auto"><li style="list-style-type:disc">WordPress database</li></ul><p id="3643c2ec-6456-80f3-b31d-f09f783df7a5" class="" dir="auto">were configured to run daily.</p><figure id="3643c2ec-6456-8073-8848-c33b2cbea45e" class="image" data-notion-image="Screenshot_2026-05-01_09-59-10.png" dir="ltr"><a href="Screenshot_2026-05-01_09-59-10.png"><img style="width:703.9833374023438px" src="Screenshot_2026-05-01_09-59-10.png"/></a></figure><p id="3643c2ec-6456-8096-83c3-c6c00e196f45" class="" dir="auto">
+</p><p id="3643c2ec-6456-808e-a0be-e4a229b9fae9" class="" dir="auto">Creating backup </p><figure id="3643c2ec-6456-800f-9c40-d2a90ecccc22" class="image" data-notion-image="backupnew.png" dir="ltr"><a href="backupnew.png"><img style="width:703.9833374023438px" src="backupnew.png"/></a></figure><p id="3643c2ec-6456-802f-92c5-f2321bfa6c2b" class="" dir="auto">
+</p><p id="3643c2ec-6456-8090-9c44-ec6eb69d828c" class="" dir="auto">Verifying Successful Backup Creation</p><figure id="3643c2ec-6456-80f5-8935-eeb7fcf8256a" class="image" data-notion-image="bakup2.png" dir="ltr"><a href="bakup2.png"><img style="width:704px" src="bakup2.png"/></a></figure><p id="3643c2ec-6456-8082-904f-eda7062ac449" class="" dir="auto">
+</p><p id="3643c2ec-6456-80a2-a69d-e2f89ff59349" class="" dir="auto">Testing the Restore Process</p><figure id="3643c2ec-6456-8089-a98b-fd5b06659dae" class="image" data-notion-image="restore.png" dir="ltr"><a href="restore.png"><img style="width:704px" src="restore.png"/></a></figure><p id="3643c2ec-6456-8047-b0d9-fb74af84b8dc" class="" dir="auto">
+</p><p id="3643c2ec-6456-8018-9af5-c07568c28aa2" class="" dir="auto">Verifying Successful Restore</p><figure id="3643c2ec-6456-80f3-a74c-cd025670081c" class="image" data-notion-image="restore2.png" dir="ltr"><a href="restore2.png"><img style="width:704px" src="restore2.png"/></a></figure><p id="3643c2ec-6456-801d-b438-c268da01b0cc" class="" dir="auto">Regular backups for the WordPress website were configured using UpdraftPlus. Daily backups of both files and the database were scheduled, and the restore functionality was successfully tested to ensure fast recovery after a potential security incident.</p><h4 id="3643c2ec-6456-80cf-933c-c99b7de4a896" class="" dir="auto"><strong>Exercise 10: Regular Security Testing</strong></h4><p id="3643c2ec-6456-8022-a87e-ceb42d30a134" class="" dir="auto">Perform regular security tests on the WordPress site using specialized tools and services. Identify and fix any vulnerabilities found to keep the site secure.</p><p id="3643c2ec-6456-8080-8c68-f3ff71408387" class="" dir="auto">I performed security assessment using the following tools: </p><ul id="3643c2ec-6456-806f-a28d-e529b49d1f71" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Wordfence</li></ul><ul id="3643c2ec-6456-80ea-a23a-d593f5b491af" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Nikto</li></ul><ul id="3643c2ec-6456-80e7-a05c-fafa9ea4fe4b" class="bulleted-list" dir="auto"><li style="list-style-type:disc">WPScan</li></ul><ul id="3643c2ec-6456-8025-8caf-e3858ac0afbe" class="bulleted-list" dir="auto"><li style="list-style-type:disc">Nmap</li></ul><p id="3643c2ec-6456-80e5-8f1d-cf03272804a3" class="" dir="auto"><span style="border-bottom:0.05em solid">Nikto scan </span></p><p id="3643c2ec-6456-809b-9c13-f2adeee4f050" class="" dir="auto">vulnerability scan was performed using Nikto</p><figure id="3643c2ec-6456-80e8-9d5a-f86c16d65014" class="image" data-notion-image="nikto2.png" dir="ltr"><a href="nikto2.png"><img style="width:704px" src="nikto2.png"/></a></figure><p id="3643c2ec-6456-809e-99f6-fca3b4126356" class="" dir="auto">
+</p><p id="3643c2ec-6456-8013-9df1-d8b792bc0a58" class="" dir="auto">The scan identified several security findings, including:</p><ul id="3643c2ec-6456-80b9-bc26-c1b07871397f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">missing headers</li></ul><ul id="3643c2ec-6456-8012-8759-ef28d38feed3" class="bulleted-list" dir="auto"><li style="list-style-type:disc">exposed license.txt</li></ul><p id="3643c2ec-6456-80aa-945b-fb11d5bcae0b" class="" dir="auto">
+</p><p id="3643c2ec-6456-8068-acab-f38d759b133f" class="" dir="auto"><span style="border-bottom:0.05em solid">Nmap Scan </span></p><p id="3643c2ec-6456-80c0-b7d4-c0fa07f6c309" class="" dir="auto">An Nmap scan was performed to identify open ports and running services.</p><figure id="3643c2ec-6456-80d0-8ae7-fe4087ce7a82" class="image" data-notion-image="nmap.png" dir="ltr"><a href="nmap.png"><img style="width:703.9833374023438px" src="nmap.png"/></a></figure><p id="3643c2ec-6456-80c9-b001-fad29bf21744" class="" dir="auto">
+</p><p id="3643c2ec-6456-80f8-b01d-f246c9619a7e" class="" dir="auto"><span style="border-bottom:0.05em solid">WPScan </span></p><p id="3643c2ec-6456-80ff-a37e-d34c045483aa" class="" dir="auto">WPScan was used to analyze the WordPress installation.</p><figure id="3643c2ec-6456-8061-82c6-ed36986dea35" class="image" data-notion-image="wpscan.png" dir="ltr"><a href="wpscan.png"><img style="width:704px" src="wpscan.png"/></a></figure><p id="3643c2ec-6456-804b-8fc5-e677fa575d44" class="" dir="auto">WPScan found:</p><ul id="3643c2ec-6456-80ee-b73b-c8c0af3fde35" class="bulleted-list" dir="auto"><li style="list-style-type:disc">XML-RPC enabled</li></ul><ul id="3643c2ec-6456-80fc-918c-c101dd2f952f" class="bulleted-list" dir="auto"><li style="list-style-type:disc">exposed readme.html</li></ul><ul id="3643c2ec-6456-808c-8439-d8c2e8cd4257" class="bulleted-list" dir="auto"><li style="list-style-type:disc">WordPress version/theme info</li></ul><p id="3643c2ec-6456-80db-98c6-d5682a987588" class="" dir="auto"><strong>Security Hardening Measures Applied</strong></p><p id="3643c2ec-6456-808d-b506-fdcf3c8cb952" class="" dir="auto"><span style="border-bottom:0.05em solid">Configuring Security Headers</span></p><p id="3643c2ec-6456-8078-93ca-f7f490ec5ac0" class="" dir="auto">To fix the missing HTTP security headers identified by Nikto, the <mark class="highlight-default" data-notion-highlight="default"><code>.htaccess</code></mark> file was modified.<br/>The following configuration was added:</p><p id="3643c2ec-6456-80c8-b3f6-c6355a63c2a7" class="" dir="auto">&lt;IfModule mod_headers.c&gt;<br/>Header always set X-Frame-Options &quot;SAMEORIGIN&quot;<br/>Header always set X-Content-Type-Options &quot;nosniff&quot;<br/>&lt;/IfModule&gt;</p><p id="3643c2ec-6456-8052-990b-ec47b60920d7" class="" dir="auto">a2enmod headers<br/>service apache2 restart</p><p id="3643c2ec-6456-80bd-8b53-d65c2989b243" class="" dir="auto">These headers help protect the website against:</p><ul id="3643c2ec-6456-80c4-83a8-c8100ce5074c" class="bulleted-list" dir="auto"><li style="list-style-type:disc">clickjacking attacks</li></ul><ul id="3643c2ec-6456-8007-803a-c6c18581b365" class="bulleted-list" dir="auto"><li style="list-style-type:disc">MIME-type sniffing attacks</li></ul><p id="3643c2ec-6456-8046-aab7-dda88eed86f2" class="" dir="auto"><span style="border-bottom:0.05em solid">Blocking XML-RPC</span></p><p id="3643c2ec-6456-80c6-851e-d827e971a4f2" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">To reduce the risk of brute-force attacks and abuse of the WordPress XML-RPC interface, access to </mark><mark class="highlight-default" data-notion-highlight="default"><code>xmlrpc.php</code></mark><mark class="highlight-default" data-notion-highlight="default"> was blocked.</mark></p><p id="3643c2ec-6456-80ea-aa3b-cbfb82a81ffb" class="" dir="auto">&lt;Files xmlrpc.php&gt;<br/>Order Deny,Allow<br/>Deny from all<br/>&lt;/Files&gt;</p><p id="3643c2ec-6456-8073-a233-e00624a603d1" class="" dir="auto"><span style="border-bottom:0.05em solid">Removing Exposed Information Files</span></p><p id="3643c2ec-6456-80f0-9972-e9959fdd0bf6" class="" dir="auto">rm /var/www/html/readme.html<br/>rm /var/www/html/license.txt</p><p id="3643c2ec-6456-8012-91ae-e26950e60b26" class="" dir="auto">
+</p><p id="3643c2ec-6456-80bb-9267-e8c369d7d1da" class="" dir="auto"><strong>After Hardening</strong></p><p id="3643c2ec-6456-80f7-b041-f3e8375c3cc3" class="" dir="auto">Several hardening measures were implemented to improve the security of the application:</p><ul id="3643c2ec-6456-8040-abc4-c667d471e384" class="bulleted-list" dir="auto"><li style="list-style-type:disc">security headers were configured</li></ul><ul id="3643c2ec-6456-802a-8408-d54fe5492ef1" class="bulleted-list" dir="auto"><li style="list-style-type:disc">XML-RPC access was blocked</li></ul><ul id="3643c2ec-6456-80cf-a587-d75550ee10f8" class="bulleted-list" dir="auto"><li style="list-style-type:disc">exposed information files were removed</li></ul><p id="3643c2ec-6456-8030-a1e4-de1841ad1e14" class="" dir="auto">
+</p><figure id="3643c2ec-6456-8032-9fa2-dc1e1d0102da" class="image" data-notion-image="dupahardening.png" dir="ltr"><a href="dupahardening.png"><img style="width:682px" src="dupahardening.png"/></a></figure><p id="3643c2ec-6456-80f4-bb7b-e54529995751" class="" dir="auto">
+</p><p id="3643c2ec-6456-804c-a03e-df78a293928f" class="" dir="auto">The final scan showed a significant improvement. Most of the previously identified findings were resolved.</p><p id="3643c2ec-6456-8014-8ec0-c5fc57337391" class="" dir="auto"><mark class="highlight-default" data-notion-highlight="default">Only one minor warning remained related to the </mark><mark class="highlight-default" data-notion-highlight="default"><code>X-Content-Type-Options</code></mark><mark class="highlight-default" data-notion-highlight="default"> header during the HTTP to HTTPS redirection process.</mark></p><p id="3643c2ec-6456-80e5-85c5-dec739e68327" class="" dir="auto">This warning is considered non-critical because the website redirects all traffic to HTTPS.</p><figure id="3643c2ec-6456-8074-b64e-dc567715a623" class="image" data-notion-image="f7256027-6a20-4ea6-b9b7-88c9a336f152.png" dir="ltr"><a href="f7256027-6a20-4ea6-b9b7-88c9a336f152.png"><img style="width:609.5540138751239px" src="f7256027-6a20-4ea6-b9b7-88c9a336f152.png"/></a></figure><p id="3643c2ec-6456-803c-95aa-e6d08365a78d" class="" dir="auto">
+</p><p id="3643c2ec-6456-806c-a3df-eccab5c66cae" class="" dir="auto">After remediation and re-testing, the final scans confirmed that no critical vulnerabilities were present and the overall security posture of the website was significantly improved.</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

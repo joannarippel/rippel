@@ -1,0 +1,811 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Practical Exercise on Linux File and Folder Operations</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+	/* Paint a complete callout box on every PDF page fragment. */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* For default-background callouts, render the border outline. */
+.callout.block-color-default_background {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+/*
+ * Toggles and callouts hold arbitrary content, so they can easily be taller
+ * than a page. They must stay breakable: avoiding breaks inside them makes
+ * Chromium push the whole block onto the next page, which leaves the previous
+ * page mostly empty before every long toggle.
+ */
+details,
+aside {
+	margin: 1.25em 0;
+}
+
+/* Keep a toggle's title on the same page as the start of its content. */
+summary {
+	page-break-after: avoid;
+	break-after: avoid;
+}
+
+/*
+ * Toggle headings render as <h1/h2/h3 style="display:inline-block"> inside
+ * <summary>. Without this reset, the heading's margin-top pushes it below the
+ * ::marker (▼), so the triangle and the title appear on separate lines.
+ */
+summary h1,
+summary h2,
+summary h3,
+summary h4 {
+	margin-top: 0;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding-inline: 0.125rem;
+	padding-block: 0.375rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+/*
+ * Render emoji icons using a ::before pseudo-element to keep the glyph
+ * out of the DOM textContent traversal. This avoids double-rendering icons
+ * in callouts and page titles.
+ * NOTE(slim/html-export-pseudo-icons): I can't tagref this because it will
+ * flag as a duplicate tag after codegen.
+ */
+.icon[data-emoji]::before {
+	content: attr(data-emoji);
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	margin-right: 0.4em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.tab {
+	margin: 1.25em 0;
+	padding-inline: 1rem;
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style><style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex-swap.min.css')</style></head><body><article id="2b73c2ec-6456-817b-a924-e492a3d47e9e" class="page sans"><header><h1 class="page-title" dir="auto">Practical Exercise on Linux File and Folder Operations</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-select"><th><span class="icon property-icon"><img src="https://app.notion.com/icons/arrow-circle-down_gray.svg" style="width:14px;height:14px;display:block"/></span>Level of expertise</th><td><span class="selected-value select-value-color-green">Linux</span></td></tr></tbody></table></header><div class="page-body"><h3 id="2bd3c2ec-6456-8097-8a58-fcaf87826457" class="" dir="auto">Background</h3><p id="2bd3c2ec-6456-8001-afa2-e60b9bdd48c3" class="" dir="auto">This exercise focuses on practicing file system management in Linux,by creating, renaming, moving, copying, and deleting them.</p><p id="2bd3c2ec-6456-80a4-adf3-d2b2868991a9" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-8079-8b6e-d0ef1156ad5a" class="numbered-list" start="1" dir="auto"><li>Create in your user’s home the following file and folder hierarchy (\ = folder; – = file):</li></ol><p id="2bd3c2ec-6456-8065-9bfb-c312ba3d4bb7" class="" dir="auto">\Exercitiu1</p><p id="2bd3c2ec-6456-80f6-b8be-c2c5d0d23757" class="" dir="auto"><strong>\Retelistica</strong></p><p id="2bd3c2ec-6456-804c-bb9b-de31fcb36f45" class="" dir="auto">\Switch</p><p id="2bd3c2ec-6456-8040-994b-c7970e9dea4f" class="" dir="auto">– numar_porturi.jpg</p><p id="2bd3c2ec-6456-80cc-a12a-cc24c5ef090f" class="" dir="auto">– adresaMAC</p><p id="2bd3c2ec-6456-8045-9689-eb9e41b0d7fa" class="" dir="auto">– vitezaPort</p><p id="2bd3c2ec-6456-8083-840a-d63a29ee8b15" class="" dir="auto">-numarDevice</p><p id="2bd3c2ec-6456-8030-88f3-f9d559b45bd8" class="" dir="auto">-versiuneOS</p><p id="2bd3c2ec-6456-801d-aca1-c32fa6293f1c" class="" dir="auto">\Router</p><p id="2bd3c2ec-6456-80bf-9259-efdd41bdacaf" class="" dir="auto"><strong>\Geografie</strong></p><p id="2bd3c2ec-6456-8001-858d-c6a5515d44e4" class="" dir="auto">\Continente</p><p id="2bd3c2ec-6456-803d-8de8-c640b5703960" class="" dir="auto">\Europa</p><p id="2bd3c2ec-6456-8005-b861-f186b0a1df18" class="" dir="auto">\Europa de Est</p><p id="2bd3c2ec-6456-80ed-a528-fd07378388a6" class="" dir="auto">\Romania</p><p id="2bd3c2ec-6456-8060-b2b8-c80df79f4d3a" class="" dir="auto">\Bulgaria</p><p id="2bd3c2ec-6456-806c-90c7-e9e12f488d0a" class="" dir="auto">\Asia</p><p id="2bd3c2ec-6456-80d8-8717-faecd543748f" class="" dir="auto">– harta romaniei.jpg</p><p id="2bd3c2ec-6456-805f-850d-e66923bd2c10" class="" dir="auto">– harta europei.png</p><p id="2bd3c2ec-6456-8000-b7fa-cbcc3e9c16c8" class="" dir="auto"><strong>\Istorie</strong></p><p id="2bd3c2ec-6456-80e8-9d5f-d58755f2bf47" class="" dir="auto">\Protocoale de Rutare</p><p id="2bd3c2ec-6456-80a9-8b98-c4114e70398a" class="" dir="auto">– OSPF.html</p><p id="2bd3c2ec-6456-80fd-a203-fcffbbfc0e07" class="" dir="auto">– EIGRP.pdf</p><p id="2bd3c2ec-6456-8019-bb00-ff30e3616d21" class="" dir="auto">– Mihai Viteazul.jpg</p><p id="2bd3c2ec-6456-8047-b279-deb581c695d8" class="" dir="auto">– A I Cuza.png</p><p id="2bd3c2ec-6456-80d5-a993-cad6467aa174" class="" dir="auto"><strong>\Programare</strong></p><p id="2bd3c2ec-6456-80fe-b269-d99aedda70a3" class="" dir="auto">\Python</p><p id="2bd3c2ec-6456-801f-8b53-eb3259cb2b58" class="" dir="auto">\C\C++</p><p id="2bd3c2ec-6456-802d-924b-fd0ae157398d" class="" dir="auto">– Introducere in algoritmi.pdf</p><p id="2bd3c2ec-6456-8082-bee9-c882d07e8c4d" class="" dir="auto">– Dennis Ritchie.jpg</p><p id="2bd3c2ec-6456-80aa-a34f-cbdf5ebf2887" class="" dir="auto">– tema_backtracking.c</p><p id="2bd3c2ec-6456-80ac-aa26-da3056da7a0d" class="" dir="auto">\JAVA</p><p id="2bd3c2ec-6456-80e9-9005-d0520451ca00" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80d9-97ed-c4eddc64f66f" class="image" data-notion-image="e75f6089-71d5-4c8f-9745-35c741b7891a.png" dir="ltr"><a href="e75f6089-71d5-4c8f-9745-35c741b7891a.png"><img style="width:275.9043062200957px" src="e75f6089-71d5-4c8f-9745-35c741b7891a.png"/></a></figure><figure id="2bd3c2ec-6456-8004-a5f5-eba9d23d4313" class="image" data-notion-image="3b063b9a-5a9d-4adc-8966-bcfe918d2eb0.png" dir="ltr"><a href="3b063b9a-5a9d-4adc-8966-bcfe918d2eb0.png"><img style="width:238.85167464114832px" src="3b063b9a-5a9d-4adc-8966-bcfe918d2eb0.png"/></a></figure><p id="2bd3c2ec-6456-80be-917f-f590aaba8bd3" class="" dir="auto">Creating directories and files using the commands  <mark class="highlight-red" data-notion-highlight="red">mkdir </mark>for directories and touch for files </p><p id="2bd3c2ec-6456-8082-ba45-dede33225d54" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80d4-bce0-f9067db6dd13" class="image" data-notion-image="2c05da07-c813-47c2-ba23-f4571ba440ab.png" dir="ltr"><a href="2c05da07-c813-47c2-ba23-f4571ba440ab.png"><img style="width:261.5730337078652px" src="2c05da07-c813-47c2-ba23-f4571ba440ab.png"/></a></figure><p id="2bd3c2ec-6456-804e-84c5-eee05caa6446" class="" dir="auto">Final tree</p><p id="2bd3c2ec-6456-80d1-a58a-fadc6799c75c" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-805a-90c6-ecb02ce7366a" class="numbered-list" start="2" dir="auto"><li>Rename the file ‘numarDevice’ to ‘deviceActiv’.</li></ol><figure id="2bd3c2ec-6456-8049-9d99-c2fcc49c72e4" class="image" data-notion-image="191f951e-f70e-4a33-ac8f-615cbfb69fac.png" dir="ltr"><a href="191f951e-f70e-4a33-ac8f-615cbfb69fac.png"><img style="width:376.3016157989228px" src="191f951e-f70e-4a33-ac8f-615cbfb69fac.png"/></a></figure><p id="2bd3c2ec-6456-801a-9ded-f0957b488ec8" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-80d7-a6d9-ee5915ce223d" class="numbered-list" start="3" dir="auto"><li>Move ‘harta romaniei’ to the corresponding country folder inside the ‘Geografie’ folder.</li></ol><figure id="2bd3c2ec-6456-80bd-86c3-d0832cf22e30" class="image" data-notion-image="4ff5b89f-e12a-4f70-94ad-31852d0c2f82.png" dir="ltr"><a href="4ff5b89f-e12a-4f70-94ad-31852d0c2f82.png"><img style="width:230.27751196172252px" src="4ff5b89f-e12a-4f70-94ad-31852d0c2f82.png"/></a></figure><p id="2bd3c2ec-6456-802a-b9d2-cee2748f8bb1" class="" dir="auto">Using <mark class="highlight-red" data-notion-highlight="red">mv</mark> command to move folder</p><p id="2bd3c2ec-6456-8031-9491-f64751a3bbb5" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-80b9-ad0f-fb33f9d64299" class="" dir="auto"> 4. Remove folder ‘JAVA’</p><figure id="2bd3c2ec-6456-8089-bf7b-e06146fccb73" class="image" data-notion-image="af373523-adec-45c1-b4f2-46ea0ebf1aa1.png" dir="ltr"><a href="af373523-adec-45c1-b4f2-46ea0ebf1aa1.png"><img style="width:347.4285714285714px" src="af373523-adec-45c1-b4f2-46ea0ebf1aa1.png"/></a></figure><p id="2bd3c2ec-6456-8046-8f47-c88ff7644185" class="" dir="auto">Using <mark class="highlight-red" data-notion-highlight="red">rm -r </mark>command to remove folder JAVA</p><p id="2bd3c2ec-6456-8084-97c8-d0b73d7a9cb6" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-80d3-b205-c113b3ab97f2" class="numbered-list" start="5" dir="auto"><li>Move the entire folder named ‘Programare’ (including all its contained files) into the ‘Retelistica’ folder.</li></ol><figure id="2bd3c2ec-6456-8073-b6de-e8e629787d60" class="image" data-notion-image="f94fecc8-9e27-4c70-b5b2-12ec16cd566c.png" dir="ltr"><a href="f94fecc8-9e27-4c70-b5b2-12ec16cd566c.png"><img style="width:338.07308970099666px" src="f94fecc8-9e27-4c70-b5b2-12ec16cd566c.png"/></a></figure><p id="2bd3c2ec-6456-8042-8e00-ccc4056ef511" class="" dir="auto">Using <mark class="highlight-red" data-notion-highlight="red">mv </mark>command to move folder </p><p id="2bd3c2ec-6456-805e-a00e-d6f80e7c5078" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-80f6-bfb2-fa4af5ce0b1b" class="numbered-list" start="6" dir="auto"><li>Create a folder named ‘Imagini’ inside ‘/home/user/Teme’ where you copy all the files with the .jpg extension from the file hierarchy created in exercise 1.</li></ol><p id="2bd3c2ec-6456-80f2-981c-dd32b8fab720" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-806f-b98e-ffceced90932" class="image" data-notion-image="task6_profu.png" dir="ltr"><a href="task6_profu.png"><img style="width:809px" src="task6_profu.png"/></a></figure><ol type="1" id="2bd3c2ec-6456-8060-9bce-f7f819192acc" class="numbered-list" start="7" dir="auto"><li>Using the graphical interface (with the mouse), do the same this time inside the folder ‘~/Teme/Imagini2’ which you create.</li></ol><p id="2bd3c2ec-6456-80bd-844f-ec3f41cc5aa0" class="" dir="auto">
+</p><figure id="2bd3c2ec-6456-80d0-ab4a-cdc01da09a8c" class="image" data-notion-image="task7.png" dir="ltr"><a href="task7.png"><img style="width:616px" src="task7.png"/></a></figure><figure id="2bd3c2ec-6456-803f-a704-cb1eae331a08" class="image" data-notion-image="task7_1.png" dir="ltr"><a href="task7_1.png"><img style="width:616px" src="task7_1.png"/></a></figure><p id="2bd3c2ec-6456-80c2-9888-f302d848ad41" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8011-b55b-cc98ed9247a4" class="" dir="auto">
+</p><ol type="1" id="2bd3c2ec-6456-806d-b6c1-d43c12e0a35d" class="numbered-list" start="8" dir="auto"><li>Delete all the files, from the entire previously created hierarchy, whose names end with an extension (e.g., jpg, png, html, etc.).</li></ol><figure id="2bd3c2ec-6456-8042-8c4e-f173fe7d42fb" class="image" data-notion-image="tema1_8_profu.png" dir="ltr"><a href="tema1_8_profu.png"><img style="width:809px" src="tema1_8_profu.png"/></a></figure><ol type="1" id="2bd3c2ec-6456-8007-a648-ddf6148f31d7" class="numbered-list" start="9" dir="auto"><li>Write the text “Linux Rulz” into a file in the ‘Downloads’ folder inside ‘home’ using the graphical interface. Then from the command line, display the contents of the file.</li></ol><figure id="2bd3c2ec-6456-8023-a79a-d1c2d8d51f01" class="image" data-notion-image="task9.png" dir="ltr"><a href="task9.png"><img style="width:710px" src="task9.png"/></a></figure><figure id="2bd3c2ec-6456-8021-b2d4-dff46800628d" class="image" data-notion-image="task9_1.png" dir="ltr"><a href="task9_1.png"><img style="width:710px" src="task9_1.png"/></a></figure><hr id="2bd3c2ec-6456-80c5-a0a7-e41d5a26cbaa" dir="auto"/><hr id="2bd3c2ec-6456-80b0-9a67-d7cd5dce577e" dir="auto"/><ol type="1" id="2bd3c2ec-6456-8083-8e88-c3efb3336b38" class="numbered-list numbered-list-digits-2" start="10" dir="auto"><li>Although it was not specified in the requirements, I also moved the subfolder <strong>‘Protocoale de Rutare’</strong> from the <strong>‘Istorie’</strong> folder to the <strong>‘Retelistica’</strong> folder for better organization and consistency.</li></ol><p id="2bd3c2ec-6456-80fc-a668-ebc2a6d42acc" class="" dir="auto">The final structure of my directory tree is shown in the screenshot below.</p><figure id="2bd3c2ec-6456-80b9-b979-e5d474aca169" class="image" data-notion-image="c5780df3-4045-4084-b6bd-0c5498cfef7a.png" dir="ltr"><a href="c5780df3-4045-4084-b6bd-0c5498cfef7a.png"><img style="width:172.3076923076923px" src="c5780df3-4045-4084-b6bd-0c5498cfef7a.png"/></a></figure><p id="2bd3c2ec-6456-80c6-92e9-d1ca9fcdb43e" class="" dir="auto">
+</p><p id="2bd3c2ec-6456-8011-a812-c5d06f61cf80" class="" dir="auto">Through this exercise, I gained practical experience in file system navigation and manipulation, which are essential skills for efficient Linux system management.</p><p id="2bd3c2ec-6456-80f4-be40-cecb27e02ea2" class="" dir="auto">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
